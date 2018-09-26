@@ -1,0 +1,343 @@
+<!-- {% block content %} -->
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<!-- w3-css loading -->
+
+		<title>CSTB - Crispr Search Tool for Bacteria</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		
+		<!-- 
+		<script type="text/javascript">
+  			var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; 
+		</script>
+		-->
+
+		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+
+		<!-- Code for fetching jquery and jstree online [requires internet connection]-->
+		<!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
+		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.js"></script> <!-- backup -->
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+        <script type="text/javascript" charset="utf-8">
+            var socket = io.connect('http://crispr-dev.ibcp.fr:80'); //3002
+            socket.on('connect', function() {
+				console.log('connected');
+                socket.emit('clientConnection', {data: 'I\'m connected!'});
+            });
+        </script>
+
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"></script>
+		<script src="./responsive.js"></script>
+
+		<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+		<!-- <link rel='stylesheet' href="{{ url_for('static',filename='custom.css') }}"> -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css">
+
+		<!--
+		The code below is an attempt to load js libraries locally. Does not work so far.
+		<link rel="stylesheet" href="dist/themes/default/style.min.css" >
+		<script src="jquery-3.1.1.slim.js" ></script>
+		<script>jQuery.noConflict();</script>
+		<script src="dist/jstree.min.js" ></script>
+		<script src="{{ url_for('static',filename='responsive.js') }}"></script>
+		-->
+
+		<!-- modif begin -->
+		<link href="https://fonts.googleapis.com/css?family=Alfa+Slab+One|Permanent+Marker" rel="stylesheet">
+		<link rel="icon" href="/static/favicon.ico" />
+		<!-- modif end-->
+
+	</head>
+
+	<style>
+
+		.city {display:none;}
+
+		.loader {
+			border: 16px solid #f3f3f3; /* Light grey */
+			border-top: 16px solid #3498db; /* Blue */
+			border-radius: 50%;
+			width: 120px;
+			height: 120px;
+			animation: spin 2s linear infinite;
+		}
+
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+
+		textarea {
+			width: 100%;
+			height: 150px;
+			padding: 12px 20px;
+			box-sizing: border-box;
+			border: 2px solid #ccc;
+			border-radius: 4px;
+			background-color: #f8f8f8;
+			resize: none;
+		}
+
+		select {
+			width: 100%;
+			padding: 16px 20px;
+			border: none;
+			border-radius: 4px;
+			background-color: #f1f1f1;
+		}
+
+		th, td {
+    		padding: 10px;
+    		border: 1px solid #ddd;
+    		text-align: center;
+		}
+		#wrap {
+    		width: '50%';
+    		height: 400px;
+    		overflow: auto;
+		}
+
+		#error{
+			color: red;
+		}
+
+
+	</style>
+
+	<body>
+
+		<div class="w3-container w3-light-grey w3-center">
+			<h1 style="font-family: 'Alfa Slab One', cursive;" class="w3-opacity w3-hover-opacity-off">Crispr Search Tool for Bacteria</h1>
+			<img src="./CSTB_logo_2.png" class="w3-opacity w3-hover-opacity-off" style="max-width:140px">
+			<p class="w3-wide w3-opacity" style="font-family: 'Permanent Marker', cursive">A user-friendly intuitive CRISPR target predictor for bacteria</p>
+		</div>
+
+		<div class="w3-container w3-row" id="Tabselection">
+			 <div id='AG_click' class="w3-half tablink w3-bottombar w3-hover-light-grey w3-padding w3-center w3-border-red">ALL GENOMES</div>
+			 <div id='AG_click2' class="w3-half tablink w3-bottombar w3-hover-light-grey w3-padding w3-center w3-border-light-grey w3-text-grey">ALL GENOMES</div>
+			 <div id='SG_click' class="w3-half tablink w3-bottombar w3-hover-light-grey w3-padding w3-center w3-border-green">SPECIFIC GENE</div>
+			 <div id='SG_click2' class="w3-half tablink w3-bottombar w3-hover-light-grey w3-padding w3-center w3-border-light-grey w3-text-grey">SPECIFIC GENE</div>
+		</div>
+
+		<!-- ALL GENOME -->
+		<div id=allg_tips class="w3-panel w3-border w3-light-grey w3-round-large">
+			<p>Here you can find sgRNA sequence(s) to kill bacteria by CRISPR. You have to choose the bacterial species which you want to target and the species in which you want to avoid sgRNA hybridisation.</p>
+		</div>
+
+		<!-- BEGIN TREE -->
+		<div id='tree_ag' class="w3-container w3-border w3-margin-bottom w3-padding-bottom">
+
+			<div class="w3-half">
+				<h3 class="w3-container w3-red"><i>Organisms to target</i></h3>
+				<input classe="w3-input w3-margin-left w3-margin-right" style="max-width:600px" id="search_in" type="text" value="" placeholder="Search for an organism" />
+				<div id="wrap">
+					<div id="tree_include" class="w3-container w3-hover-pale-red">
+					</div>
+				</div>
+			</div>
+
+			<div class="w3-half">
+				<h3 class="w3-container w3-green"><i>Organisms to exclude</i></h3>
+				<input classe="w3-input w3-margin-left w3-margin-right" style="max-width:600px" id="search_notin" type="text" value="" placeholder="Search for an organism" />
+				<div id="wrap">
+					<div id="tree_exclude" class="w3-container w3-hover-pale-green">
+					<!-- Here will display the tree -->
+					</div>
+				</div>
+			</div>
+			<button id="submit_trees" class="w3-btn w3-ripple w3-green w3-right"><b>Submit selections</b></button>
+			<button id="reset_trees" class="w3-btn w3-ripple w3-red w3-left">Reset trees</button>
+		</div>
+		<!-- END TREE -->
+
+		<!-- BEGIN CONFIRMATION SELECTION -->
+
+		<div id='list_selection'>
+			<div class="w3-row">
+				<div id="ShowIN" class="w3-half w3-padding w3-text-red w3-center" style="display:none">
+					<b>List of bacteria will be targeted: </b>
+					<select id="InView" multiple=True size=3> </select>
+				</div>
+				<div id="ShowNOTIN" class="w3-half w3-padding w3-text-green w3-center" style="display:none">
+					<b>List of bacteria without target:</b>
+					<select id="NotInView" multiple=True size=3></select>
+				</div>
+			</div>
+			<br>
+			<div id="confirm" class='w3-border w3-padding w3-center'> <b>Confirm your selection ? </b><button id='confirm_y' class='w3-button w3-green'> Yes </button> <button id='confirm_n' class='w3-button w3-red'> No </button> </div>
+		</div>
+
+		<!-- END CONFIRMATION SELECTION -->
+
+		<!-- BEGIN OTHER PARAMETERS -->
+
+		<div id="other_parameters" style="display:none">
+			<h4>Other parameters</h4>
+			<div class="w3-row">
+				<div class="w3-third w3-padding w3-card-4 w3-hover-light-blue">
+					<h6>PAM motif</h6>
+					<select name='pam_AllG'>
+						<option>NGG</option>
+					</select>
+				</div>
+				<div class="w3-third w3-padding w3-card-4 w3-hover-light-blue">
+					<h6>sgRNA length (without PAM motif)</h6>
+					<select name='sgrna-length_AllG'>
+						<option>15</option>
+						<option>16</option>
+						<option>17</option>
+						<option>18</option>
+						<option>19</option>
+						<option selected>20</option>
+					</select>
+				</div>
+			</div>
+		<button id="submitbtn" class="w3-btn w3-ripple w3-right w3-blue-grey" style="display:none"><b>Submit</b></button>
+		</div>
+		<!-- END OTHER PARAMETERS -->
+
+		<div id=spec_tips class="w3-panel w3-border w3-light-grey w3-round-large">
+			<p>Here you can search for sgRNA construct(s) in one or more bacterial species for use in CRISPRinterference. You must input a sequence, whose homologs will be found in selected bacteria, and common sgRNAs, if they exist, will be found. You can also choose bacteria in which you want to avoid sgRNA hybridisation. </p>
+		</div>
+
+		<div class="w3-container" id="Sequenceupload">
+			<div class="w3-row">
+				<div id='seq_section' class="w3-half w3-padding">
+					<h3>Paste here your own sequence...</h3>
+					<textarea id="seq" name="sequence" cols="50" rows="3" style="font-family:'Courier New', Courier, monospace"></textarea>
+				</div>
+				<div id="loadFile_section" class="w3-half w3-padding">
+					<h3>or upload a fasta file.</h3>
+					<input type="file" id="fasta-file" ><br>
+					<button id='load-file' class="w3-btn-block w3-ripple w3-green w3-margin-top">
+						&lsaquo; &lsaquo; &lsaquo; Load file to the area
+					</button><br>
+					<a id='error' name='error-load'></a>
+				</div>
+			</div>
+		</div>
+		<button id='next' class="w3-btn w3-ripple w3-green w3-right">Next &rsaquo;</button>
+
+		<div id='ShowSeq' class="w3-small w3-border-left w3-border-right w3-border-bottom w3-margin" style="font-family:'Courier New', Courier, monospace">
+		</div>
+
+		<div class="w3-container w3-border w3-margin-bottom w3-padding-bottom" id='tree'>
+			<div class="w3-row">
+				<div class="w3-half">
+					<h3 class="w3-container w3-red"><i>Organisms to target</i></h3>
+					<input classe="w3-input w3-margin-left w3-margin-right" style="max-width:600px" id="search_in_sg" type="text" value="" placeholder="Search for an organism" />
+					<div id="wrap">
+						<div id="tree_include_sg" class="w3-container w3-hover-pale-red">
+					<!-- Here will display the tree -->
+						</div>
+					</div>
+				</div>
+				<div class="w3-half">
+					<h3 class="w3-container w3-green"><i>Organisms to exclude</i></h3>
+					<input classe="w3-input w3-margin-left w3-margin-right" style="max-width:600px" id="search_notin_sg" type="text" value="" placeholder="Search for an organism" />
+					<div id="wrap">
+						<div id="tree_exclude_sg" class="w3-container w3-hover-pale-green">
+						<!-- Here will display the tree -->
+						</div>
+					</div>
+				</div>
+			</div>
+			<button id="submit_trees_sg" class="w3-btn w3-ripple w3-green w3-right"><b>Submit selections</b></button>
+			<button id="reset_trees_sg" class="w3-btn w3-ripple w3-red w3-left">Reset trees</button>
+		</div>
+
+		<div id='list_selection_sg'>
+			<div class="w3-row">
+				<div id="ShowIN_sg" class="w3-half w3-padding w3-text-red w3-center" style="display:none">
+					<b>List of bacteria will be targeted: </b>
+					<select id="InView_sg" multiple=True size=3> </select>
+				</div>
+				<div id="ShowNOTIN_sg" class="w3-half w3-padding w3-text-green w3-center" style="display:none">
+					<b>List of bacteria without target:</b>
+					<select id="NotInView_sg" multiple=True size=3></select>
+				</div>
+			</div>
+			<br>
+			<div id="confirm_sg" class='w3-border w3-padding w3-center'> <b>Confirm your selection ? </b><button id='confirm_y_sg' class='w3-button w3-green'> Yes </button> <button id='confirm_n_sg' class='w3-button w3-red'> No </button> </div>
+		</div>
+
+		<div id="other_parameters_sg" class="w3-container">
+			<h4>Other parameters</h4>
+			<div id=cadre class="w3-row">
+
+				<div class="w3-third w3-padding w3-card-4 w3-hover-light-blue">
+					<h6>Search from position 1 to position <i>(0 if you want to search in all sequence)</i> </h6>
+					<input type="number" id="search-region" value="100" min="23" width="10px" title="0 if you want to search in all sequence">
+					<br>
+					<a id='error' name='error-n'></a>
+				</div>
+
+				<div class="w3-third w3-padding w3-card-4 w3-hover-light-blue">
+					<h6>Percentage identity min for homolog genes research</h6>
+					<input type="number" id="percent-identity" value="70" min="0" max='100' width="10px">
+					<br>
+					<a id='error' name='error-pid'></a>
+				</div>
+
+				<!-- 3 lines suppressed -->
+				<div class="w3-third w3-padding w3-card-4 w3-hover-light-blue">
+					<h6>PAM motif</h6>
+					<select name='pam'>
+						<option>NGG</option>
+					</select>
+				</div>
+
+				<div class="w3-third w3-padding w3-card-4 w3-hover-light-blue">
+					<h6>sgRNA length (without PAM motif)</h6>
+					<select name='sgrna-length'>
+						<option>15</option>
+						<option>16</option>
+						<option>17</option>
+						<option>18</option>
+						<option>19</option>
+						<option selected>20</option>
+					</select>
+				</div>
+			</div>
+
+			<button class="w3-btn w3-ripple w3-blue-grey w3-right" id="submitbtn_sg"><b>Submit query</b></button>
+
+		</div>
+
+		<div id="Waiting" classe="w3-padding w3-margin-left" style="display:none">
+			<div class="loader w3-margin"></div>
+			<h2 class="w3-center"> Processing your request... </h2>
+			<!-- <p id="result"></p> -->
+		</div>
+
+		<div id="Result" style="display:none">
+			<a id='result-file' class="w3-btn w3-green"></a><button class="w3-btn w3-red" onclick="reloadpage()"><b>New Search</b></button>WARNING: Clicking on 'New Search' will lose the displayed information. Please download the results first.
+				<!-- Table of results -->
+			<div class="w3-panel w3-pale-green w3-bottombar w3-border w3-border-green w3-center" id="infos">
+			</div>
+			<table id="ResTable" style="width:100%">
+			</table>
+		</div>
+
+		<div id="NoResult" style="display:none">
+			<button class="w3-btn w3-red" onclick="reloadpage()"><b>New Search</b></button>
+				<!-- Table of results -->
+			<div class="w3-panel w3-pale-red w3-border w3-border-red w3-center" id='no_result'>
+			</div>
+		</div>
+
+		<div style="height: auto;"></div>
+
+		<div id='footer' class="w3-container w3-teal w3-small w3-tail w3-light-grey w3-center">
+				Made by : C.Hilpert, S. Hu, T. Sluys, B. Simon-Letcher<br>
+				Many thanks : C. Lesterlin, E. Guéguen, C. Knibbe, L. Guéguen, P. Garcia, D. De Vienne<br>
+				Oct.-Dec. 2016<br>
+				Master 1 Bioinformatics @ Claude Bernard University Lyon 1
+		</div>
+
+
+	</body>
+
+</html>
+<!-- {% endblock %} -->
