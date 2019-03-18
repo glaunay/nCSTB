@@ -2,8 +2,7 @@ let express = require('express');
 let app = express();
 let utils = require('util');
 let http = require('http').Server(app);
-
-let _io = require('socket.io')(http);
+let io = require('socket.io')(http);
 
 const program = require("commander");
 const logger = require("./logger").logger;
@@ -15,19 +14,15 @@ let APP_PORT = 3002;
 let DATA_FOLDER = "/data/databases/mobi/crispr/reference_genomes";
 
 let jobManager = require('ms-jobmanager');
-
+let JM_PORT = 1234;
 let JM_ADRESS = "127.0.0.1";
-let JM_PORT = undefined;
+
 
 program
 .version('0.1.0')
 .option('-v, --verbosity [logLevel]', 'Set log level', setLogLevel, 'info')
-.option('-p, --port [TCP_PORT]', 'Job Manager socket')
 .parse(process.argv);
 
-if (!program.port)
-    throw (`Please specify a port`);
-JM_PORT = parseInt(program.port);
 
 jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
     .on('ready', () => {
@@ -68,29 +63,6 @@ app.get('/download/:jm_id/:job_id', (req,res) => {
     res.download(_path);
 });
 
-app.get('/delete/', (req,res) => {
-    let cacheLoc = "/data/dev/crispr/tmp/";
-    let jobOpt = {
-        "exportVar" : {
-            "cache_location" : cacheLoc,
-        },
-        "modules" : ["crispr"],
-        "jobProfile" : "crispr-dev",
-        "script" : `${__dirname}/../data/scripts/deleteCache_coreScript.sh`
-    };
-    logger.info(`==>Trying to delete cache at ${cacheLoc}`);
-   
-    let job = jobManager.push(jobOpt);
-    job.on("completed",(stdout, stderr) => {
-
-        let _buffer = "";
-        stdout.on('data',(d)=>{_buffer += d.toString();})
-        .on('end',() => {
-            logger.info(`==>Deleting cache at ${_buffer}`);
-            res.send();
-        });
-    });
-});
 
 /*
     Socket management
@@ -98,7 +70,7 @@ app.get('/delete/', (req,res) => {
 http.listen(APP_PORT,()=>{
     logger.info(`Listening on port ${APP_PORT}`);
 });
-_io.on('connection', (socket)=>{ 
+io.on('connection', (socket)=>{ 
     logger.info('connection')
 
     socket.on("submitSpecific", (data) =>{
@@ -144,9 +116,6 @@ _io.on('connection', (socket)=>{
                 }            
                 socket.emit('resultsSpecific', ans);           
             });
-        })
-        .on('lostJob', () => {
-            socket.emit('lostJob');     
         });
     });
 

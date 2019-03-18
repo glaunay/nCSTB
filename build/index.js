@@ -52,6 +52,25 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
         let _path = `/data/dev/crispr/tmp/${req.params.jm_id}/${req.params.job_id}/results_allgenome.txt`;
         res.download(_path);
     });
+    app.get('/delete', (req, res) => {
+        let cacheLoc = "/data/dev/crispr/tmp/";
+        let jobOpt = {
+            "exportVar": {
+                "cache_location": cacheLoc,
+            },
+            "jobProfile": "crispr-dev",
+            "script": `${__dirname}/../data/scripts/deleteCache_coreScript.sh`
+        };
+        logger.info(`==>Deleting cache at ${cacheLoc}`);
+        let job = jobManager.push(jobOpt);
+        job.on("completed", (stdout, stderr) => {
+            let _buffer = "";
+            stdout.on('data', (d) => { _buffer += d.toString(); })
+                .on('end', () => {
+                logger.info(`==>Deleting cache at ${_buffer}`);
+            });
+        });
+    });
     /*
         Socket management
     */
@@ -98,6 +117,9 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
                     }
                     socket.emit('resultsSpecific', ans);
                 });
+            })
+                .on('lostJob', () => {
+                socket.emit('lostJob');
             });
         });
         socket.on('submitAllGenomes', (data) => {

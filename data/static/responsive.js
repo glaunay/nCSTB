@@ -11,6 +11,13 @@ socket.on("resultsSpecific", function(data) {
     treatResultsSG(data);
 });
 
+socket.on("lostJob", displayError);
+
+function displayError() {
+	console.log("Tweet");
+	$('body *').remove();
+	$('body').append(' <div style=\"color:red; font-size:5em\"> Lost JOB </div>');
+}
 
 // last modif at 16 dec 2016 01:18
 function verifyFasta(seq){

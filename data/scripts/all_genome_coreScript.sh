@@ -23,7 +23,7 @@
 #gni=$gi;
 
 echo "allgenomes.py -cah \"dummy\" -rfg $rfg -gi \"$gi\" -gni \"$gni\" -pam $pam -sl $sl -async" > ./cmd.txt
-allgenomes.py -cah "dummy" -rfg $rfg -gi "$gi" -gni "$gni" -pam $pam -sl $sl -async 2>> ./allgenomes.err 1> ./allgenomes.log
+allgenomes.py -cah "dummy" -rfg $rfg -gi "$gi" -gni "$gni" -pam $pam -sl $sl -async -copy False -pickle False 2>> ./allgenomes.err 1> ./allgenomes.log
 
 if grep "Program terminated" ./allgenomes.log > /dev/null;
 then
@@ -45,3 +45,11 @@ else
 	#number_hits=lines[2].strip()
     echo "{\"out\" : {\"data\" : $(cat ./results.json),  \"not_in\" : \""$not_in"\",  \"number_hits\" : \""$number_hits"\", \"tag\" : \""$loc"\"}}"
 fi
+## No need to clean done w/ common_function.py module
+#if [ -d ./reference_genomes ]
+#then
+#    du -skh ./reference_genomes > ./refGen.size
+#    rm -rf ./reference_genomes
+#else
+#    echo 'no reference_genomes' > ./refGen.size
+#fi
