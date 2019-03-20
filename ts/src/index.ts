@@ -10,6 +10,8 @@ const logger = require("./logger").logger;
 const setLogLevel = require("./logger").setLogLevel;
 const setLogFile = require("./logger").setLogFile;
 
+import jsonfile = require('jsonfile');
+
 let APP_PORT = 3002;
 //let OLD_CACHE = "/data/dev/crispr/tmp";
 let DATA_FOLDER = "/data/databases/mobi/crispr/reference_genomes";
@@ -19,36 +21,65 @@ let jobManager = require('ms-jobmanager');
 let JM_ADRESS = "127.0.0.1";
 let JM_PORT = undefined;
 
+
+
 program
 .version('0.1.0')
 .option('-v, --verbosity [logLevel]', 'Set log level', setLogLevel, 'info')
 .option('-p, --port [TCP_PORT]', 'Job Manager socket')
+.option('-c, --conf [JSON_PARAM]', 'web service configuration file')
 .parse(process.argv);
 
 if (!program.port)
     throw (`Please specify a port`);
-JM_PORT = parseInt(program.port);
+if (!program.conf)
+    throw (`Please specify a conf`);
 
+let param = jsonfile.readFileSync(program.conf);
+
+JM_PORT = parseInt(program.port);
 jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
     .on('ready', () => {
         logger.info("Starting web server");
 app.use(express.static('data/static'));
 
 
+app.get('/kill/:jobid',  (req, res) => {
+    let jobOptTest = {
+        "jobProfile" : "crispr-dev",
+        "cmd" : `scancel ${req.params.jobid}`
+    };
+    logger.info(`Trying to execute ${utils.format(jobOptTest)}`);
+
+    let jobTest = jobManager.push(jobOptTest);
+    jobTest.on("completed",(stdout, stderr) => {
+        logger.info(`JOB completed\n${utils.format()}`);
+        stdout.on('data',(d)=>{
+            logger.info(`${ d.toString() }`);
+            res.send(d.toString());
+        });
+    });
+});
+
 app.get('/test', function (req, res) {
-    res.send('hello world');
+    res.send('Performing test');
    // logger.info(__dirname);
     let jobOptTest = {
         "exportVar" : {
-            "rfg" : DATA_FOLDER,
-            "gi" : "PVC group&Isosphaera pallida ATCC 43644 GCF_000186345.1&Singulisphaera acidiphila DSM 18658 GCF_000242455.2&Rubinisphaera brasiliensis DSM 5305 GCF_000165715.2&Rhodopirellula baltica SH 1 GCF_000196115.1",
+            "rfg" : param.dataFolder,
+            "gi" : "Candidatus Blochmannia vafer str. BVAF GCF_000185985.2&Enterobacter sp. 638 GCF_000016325.1",
             "gni" : "\"\"",
             "pam" : "NGG",
-            "sl" : "20"
+            "sl" : "20",
+            "URL_CRISPR" : param.url_vService
+            /*,
+            "HTTP_PROXY" : "",
+            "https_proxy" : "",
+            "HTTPS_PROXY" : ""*/
         },
-        "modules" : ["crispr"],
+        "modules" : ["crispr-tools"],
         "jobProfile" : "crispr-dev",
-        "script" : `${__dirname}/../data/scripts/all_genome_coreScript.sh`
+        "script" : `${param.coreScriptsFolder}/crispr_workflow.sh`
     };
     logger.info(`Trying to push ${utils.format(jobOptTest)}`);
 
@@ -96,7 +127,7 @@ _io.on('connection', (socket)=>{
             },
             "modules" : ["crispr"],
             "jobProfile" : "crispr-dev",
-            "script" : `${__dirname}/../data/scripts/specific_gene_coreScript.sh`
+            "script" : `${__dirname}/../data/scripts/crispr_workflow_specific.sh`
         };
         
         logger.info(`Trying to push ${utils.format(jobOpt)}`);
@@ -139,15 +170,17 @@ _io.on('connection', (socket)=>{
         
         let jobOpt = {
             "exportVar" : {
-                "rfg" : DATA_FOLDER,
+                "rfg" : param.dataFolder,
                 "gi" : gi.join('&'),
                 "gni" : gni.join('&'),
                 "pam" : data.pam,
-                "sl" : data.sgrna_length
+                "sl" : data.sgrna_length,
+                "URL_CRISPR" : param.url_vService,
+                "SPECIE_REF_JSON" : param.specieRef
             },
-            "modules" : ["crispr"],
+            "modules" : ["crispr-tools"],
             "jobProfile" : "crispr-dev",
-            "script" : `${__dirname}/../data/scripts/all_genome_coreScript.sh`
+            "script" : `${param.coreScriptsFolder}/crispr_workflow.sh`
         };
         logger.info(`Trying to push ${utils.format(jobOpt)}`);
     
