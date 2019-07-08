@@ -19,7 +19,8 @@
 		<!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
 		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.js"></script> <!-- backup -->
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-        <script type="text/javascript" charset="utf-8">
+	<script src="@mmsb/result_page/dist/mycomponent.js"></script>        
+<script type="text/javascript" charset="utf-8">
             var socket = io.connect('http://crispr-dev.ibcp.fr:80'); //3002
             socket.on('connect', function() {
 				console.log('connected');

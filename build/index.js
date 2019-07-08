@@ -1,3 +1,5 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 let express = require('express');
 let app = express();
 let utils = require('util');
@@ -7,6 +9,7 @@ const program = require("commander");
 const logger = require("./logger").logger;
 const setLogLevel = require("./logger").setLogLevel;
 const setLogFile = require("./logger").setLogFile;
+const jsonfile = require("jsonfile");
 let APP_PORT = 3002;
 //let OLD_CACHE = "/data/dev/crispr/tmp";
 let DATA_FOLDER = "/data/databases/mobi/crispr/reference_genomes";
@@ -17,28 +20,53 @@ program
     .version('0.1.0')
     .option('-v, --verbosity [logLevel]', 'Set log level', setLogLevel, 'info')
     .option('-p, --port [TCP_PORT]', 'Job Manager socket')
+    .option('-c, --conf [JSON_PARAM]', 'web service configuration file')
     .parse(process.argv);
 if (!program.port)
     throw (`Please specify a port`);
+if (!program.conf)
+    throw (`Please specify a conf`);
+let param = jsonfile.readFileSync(program.conf);
 JM_PORT = parseInt(program.port);
 jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
     .on('ready', () => {
     logger.info("Starting web server");
     app.use(express.static('data/static'));
+    app.use(express.static('node_modules'));
+    app.get('/kill/:jobid', (req, res) => {
+        let jobOptTest = {
+            "jobProfile": "crispr-dev",
+            "cmd": `scancel ${req.params.jobid}`
+        };
+        logger.info(`Trying to execute ${utils.format(jobOptTest)}`);
+        let jobTest = jobManager.push(jobOptTest);
+        jobTest.on("completed", (stdout, stderr) => {
+            logger.info(`JOB completed\n${utils.format()}`);
+            stdout.on('data', (d) => {
+                logger.info(`${d.toString()}`);
+                res.send(d.toString());
+            });
+        });
+    });
     app.get('/test', function (req, res) {
-        res.send('hello world');
+        res.send('Performing test');
         // logger.info(__dirname);
         let jobOptTest = {
             "exportVar": {
-                "rfg": DATA_FOLDER,
-                "gi": "PVC group&Isosphaera pallida ATCC 43644 GCF_000186345.1&Singulisphaera acidiphila DSM 18658 GCF_000242455.2&Rubinisphaera brasiliensis DSM 5305 GCF_000165715.2&Rhodopirellula baltica SH 1 GCF_000196115.1",
+                "rfg": param.dataFolder,
+                "gi": "Candidatus Blochmannia vafer str. BVAF GCF_000185985.2&Enterobacter sp. 638 GCF_000016325.1",
                 "gni": "\"\"",
                 "pam": "NGG",
-                "sl": "20"
+                "sl": "20",
+                "URL_CRISPR": param.url_vService
+                /*,
+                "HTTP_PROXY" : "",
+                "https_proxy" : "",
+                "HTTPS_PROXY" : ""*/
             },
-            "modules": ["crispr"],
+            "modules": ["crispr-tools"],
             "jobProfile": "crispr-dev",
-            "script": `${__dirname}/../data/scripts/all_genome_coreScript.sh`
+            "script": `${param.coreScriptsFolder}/crispr_workflow.sh`
         };
         logger.info(`Trying to push ${utils.format(jobOptTest)}`);
         let jobTest = jobManager.push(jobOptTest);
@@ -62,21 +90,29 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
         logger.info('connection');
         socket.on("submitSpecific", (data) => {
             // let x = data.seq;
-            logger.info(`${utils.format(data)}`);
+            logger.info(`socket:submitSpecificGene\n${utils.format(data)}`);
+            logger.info(`included genomes:\n${utils.format(data.gi)}`);
+            logger.info(`excluded genomes:\n${utils.format(data.gni)}`);
+            logger.info(`${utils.format(data.pam)}`);
+            logger.info(`Length of motif: ${utils.format(data.sgrna_length)}`);
+            logger.info(`Query : ${utils.format(data.seq)}`);
             let jobOpt = {
                 "exportVar": {
-                    "rfg": DATA_FOLDER,
+                    "blastdb": param.blastdb,
+                    "rfg": param.dataFolder,
                     "gi": data.gi.join('&'),
                     "gni": data.gni.join('&'),
                     "pam": data.pam,
                     "sl": data.sgrna_length,
+                    "URL_CRISPR": param.url_vService,
+                    "SPECIE_REF_JSON": param.specieRef,
                     "seq": data.seq,
                     "n": data.n,
                     "pid": data.pid
                 },
-                "modules": ["crispr"],
+                "modules": ["crispr-tools", "blast+"],
                 "jobProfile": "crispr-dev",
-                "script": `${__dirname}/../data/scripts/specific_gene_coreScript.sh`
+                "script": `${param.coreScriptsFolder}/crispr_workflow_specific.sh`
             };
             logger.info(`Trying to push ${utils.format(jobOpt)}`);
             let job = jobManager.push(jobOpt);
@@ -94,7 +130,7 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
                         logger.info(`JOB completed-- Found stuff`);
                         logger.info(`${utils.inspect(buffer, false, null)}`);
                         let res = buffer.out;
-                        ans.data = [res.data, res.not_int, res.tag, res.number_hits, res.number_on_gene];
+                        ans.data = [res.data, res.not_in, res.tag, res.number_hits, res.number_on_gene];
                     }
                     socket.emit('resultsSpecific', ans);
                 });
@@ -109,26 +145,40 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
             logger.info(`included genomes:\n${utils.format(gi)}`);
             logger.info(`excluded genomes:\n${utils.format(gni)}`);
             logger.info(`${utils.format(data.pam)}`);
-            logger.info(`${utils.format(data.sgrna_length)}`);
+            logger.info(`Length of motif: ${utils.format(data.sgrna_length)}`);
             let jobOpt = {
                 "exportVar": {
-                    "rfg": DATA_FOLDER,
+                    "rfg": param.dataFolder,
                     "gi": gi.join('&'),
                     "gni": gni.join('&'),
                     "pam": data.pam,
-                    "sl": data.sgrna_length
+                    "sl": data.sgrna_length,
+                    "URL_CRISPR": param.url_vService,
+                    "SPECIE_REF_JSON": param.specieRef
                 },
-                "modules": ["crispr"],
+                "modules": ["crispr-tools"],
                 "jobProfile": "crispr-dev",
-                "script": `${__dirname}/../data/scripts/all_genome_coreScript.sh`
+                "script": `${param.coreScriptsFolder}/crispr_workflow.sh`
             };
             logger.info(`Trying to push ${utils.format(jobOpt)}`);
             let job = jobManager.push(jobOpt);
+            job.on("ready", () => {
+                logger.info(`JOB ${job.id} sumitted`);
+                socket.emit("submitted", { "id": job.id });
+            });
             job.on("completed", (stdout, stderr) => {
                 let _buffer = "";
                 stdout.on('data', (d) => { _buffer += d.toString(); })
                     .on('end', () => {
-                    let buffer = JSON.parse(_buffer);
+                    let buffer;
+                    try {
+                        buffer = JSON.parse(_buffer);
+                    }
+                    catch (e) {
+                        socket.emit('resultsAllGenomes', { "data": ["An error occured", "Please contact sys admin"] });
+                        return;
+                    }
+                    // JSON Parsing successfull
                     let ans = { "data": undefined };
                     if (buffer.hasOwnProperty("emptySearch")) {
                         logger.info(`JOB completed-- empty search\n${utils.format(buffer.emptySearch)}`);
@@ -138,7 +188,7 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
                         let res = buffer.out;
                         logger.info(`JOB completed\n${utils.format(buffer.out)}`);
                         //   ans.data = [res.data, res.not_int,  res.tag, res.number_hits];
-                        ans.data = [res.data, res.not_int, res.tag, res.number_hits];
+                        ans.data = [res.data, res.not_in, res.tag, res.number_hits, res.data_card, res.gi];
                     }
                     socket.emit('resultsAllGenomes', ans);
                 });

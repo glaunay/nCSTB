@@ -5,6 +5,13 @@ socket.on("resultsAllGenomes", function(data) {
     treatResults(data);
 });
 
+//var socket = io();
+socket.on("submitted", function(data) {
+    console.log("Submitted");
+    console.dir(data);
+});
+
+
 socket.on("resultsSpecific", function(data) {
     console.log("Showing Specific results");
     console.dir(data);
@@ -416,15 +423,24 @@ function treatResults(results){
 	$("#Waiting").hide();
     var data = results.data;
 
-	if (results.data.length==4){
+	if (results.data.length == 6){
 
 		$('#Result').show()
 		res=data[0];
 		not_in=data[1];
 		tag=data[2];
-		number_hits=data[3]
-		
+		number_hits=data[3];
+		let data_card =data[4];
+		let gi=data[5];
 		let obj = res;
+		let node = document.createElement("result-page");
+		let resDiv = document.querySelector("#Result");
+		resDiv.appendChild(node);
+		node.setAttribute( "complete_data", JSON.stringify(res) );
+		node.setAttribute( "all_data", JSON.stringify(data_card) );
+		node.setAttribute("org_names", gi);
+		console.log("bip");
+		console.dir(res);
 		//var obj = JSON.parse(res);
 		var infos='<p>' +number_hits + ' hits have been found for this research.' ;
 		if (parseInt(number_hits)>100){
@@ -445,7 +461,7 @@ function treatResults(results){
 		display_download(tag)
 
     }
-	else{
+	else{ // Check it works properly
 		$("#NoResult").show();
 		infos='<p>'+data[0]+'</p> <p> '+data[1]+'</p>'
 		$("#no_result").html(infos);

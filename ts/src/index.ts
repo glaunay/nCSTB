@@ -42,7 +42,7 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
     .on('ready', () => {
         logger.info("Starting web server");
 app.use(express.static('data/static'));
-
+app.use(express.static('node_modules'));
 
 app.get('/kill/:jobid',  (req, res) => {
     let jobOptTest = {
@@ -88,7 +88,7 @@ app.get('/test', function (req, res) {
         logger.info(`JOB completed\n${utils.format()}`);
 
         stdout.on('data',(d)=>{logger.info(`${ d.toString() }`);});
-        
+
     });
 })
 
@@ -106,32 +106,41 @@ app.get('/download/:jm_id/:job_id', (req,res) => {
 http.listen(APP_PORT,()=>{
     logger.info(`Listening on port ${APP_PORT}`);
 });
-_io.on('connection', (socket)=>{ 
+_io.on('connection', (socket)=>{
     logger.info('connection')
 
     socket.on("submitSpecific", (data) =>{
        // let x = data.seq;
-        logger.info(`${utils.format(data)}`);
+        logger.info(`socket:submitSpecificGene\n${utils.format(data)}`);
+
+        logger.info(`included genomes:\n${utils.format(data.gi)}`);
+        logger.info(`excluded genomes:\n${utils.format(data.gni)}`);
+        logger.info(`${utils.format(data.pam)}`);
+        logger.info(`Length of motif: ${utils.format(data.sgrna_length)}`);
+        logger.info(`Query : ${utils.format(data.seq)}`);
 
         let jobOpt = {
             "exportVar" : {
-                "rfg" : DATA_FOLDER,
-                "gi"  : data.gi.join('&'),
+		"blastdb" : param.blastdb,
+                "rfg" : param.dataFolder,
+                "gi" : data.gi.join('&'),
                 "gni" : data.gni.join('&'),
                 "pam" : data.pam,
-                "sl"  : data.sgrna_length,
+                "sl" : data.sgrna_length,
+                "URL_CRISPR" : param.url_vService,
+                "SPECIE_REF_JSON" : param.specieRef,
                 "seq" : data.seq,
                 "n"   : data.n,
-                "pid" : data.pid 
+                "pid" : data.pid
 
             },
-            "modules" : ["crispr"],
+            "modules" : ["crispr-tools", "blast+"],
             "jobProfile" : "crispr-dev",
-            "script" : `${__dirname}/../data/scripts/crispr_workflow_specific.sh`
+            "script" : `${param.coreScriptsFolder}/crispr_workflow_specific.sh`
         };
-        
+
         logger.info(`Trying to push ${utils.format(jobOpt)}`);
-    
+
         let job = jobManager.push(jobOpt);
         job.on("completed",(stdout, stderr) => {
 
@@ -140,17 +149,17 @@ _io.on('connection', (socket)=>{
             .on('end',() => {
                 let ans = {"data" : undefined};
                 let buffer = JSON.parse(_buffer);
-                
+
                 if (buffer.hasOwnProperty("emptySearch")) {
                     logger.info(`JOB completed-- empty search\n${utils.format(buffer.emptySearch)}`);
-                    ans.data = ["Search yielded no results.", buffer.emptySearch];   
+                    ans.data = ["Search yielded no results.", buffer.emptySearch];
                 } else {
                     logger.info(`JOB completed-- Found stuff`);
                     logger.info(`${utils.inspect(buffer, false, null)}`);
                     let res = buffer.out;
-                    ans.data = [res.data, res.not_int,  res.tag, res.number_hits, res.number_on_gene];
-                }            
-                socket.emit('resultsSpecific', ans);           
+                    ans.data = [res.data, res.not_in,  res.tag, res.number_hits, res.number_on_gene];
+                }
+                socket.emit('resultsSpecific', ans);
             });
         });
     });
@@ -166,8 +175,8 @@ _io.on('connection', (socket)=>{
         logger.info(`included genomes:\n${utils.format(gi)}`);
         logger.info(`excluded genomes:\n${utils.format(gni)}`);
         logger.info(`${utils.format(data.pam)}`);
-        logger.info(`${utils.format(data.sgrna_length)}`);
-        
+        logger.info(`Length of motif: ${utils.format(data.sgrna_length)}`);
+
         let jobOpt = {
             "exportVar" : {
                 "rfg" : param.dataFolder,
@@ -183,33 +192,44 @@ _io.on('connection', (socket)=>{
             "script" : `${param.coreScriptsFolder}/crispr_workflow.sh`
         };
         logger.info(`Trying to push ${utils.format(jobOpt)}`);
-    
+
         let job = jobManager.push(jobOpt);
+        job.on("ready", () => {
+            logger.info(`JOB ${job.id} sumitted`);
+            socket.emit("submitted", { "id" : job.id });
+        });
+
         job.on("completed",(stdout, stderr) => {
-          
+
             let _buffer = "";
             stdout.on('data',(d)=>{_buffer += d.toString();})
                     .on('end',() => {
-                        let buffer = JSON.parse(_buffer);                
+                        let buffer:any;
+                        try {
+                            buffer = JSON.parse(_buffer);
+                        } catch (e) {
+                            socket.emit('resultsAllGenomes', {"data": ["An error occured", "Please contact sys admin"]});
+                            return;
+                        }
+                        // JSON Parsing successfull
                         let ans = {"data" : undefined};
+                        if (buffer.hasOwnProperty("emptySearch")) {
+                            logger.info(`JOB completed-- empty search\n${utils.format(buffer.emptySearch)}`);
+                            ans.data = ["Search yielded no results.", buffer.emptySearch];
+                        } else {
+                            let res = buffer.out;
+                            logger.info(`JOB completed\n${utils.format(buffer.out)}`);
+                        //   ans.data = [res.data, res.not_int,  res.tag, res.number_hits];
+                            ans.data = [res.data, res.not_in,  res.tag, res.number_hits, res.data_card, res.gi];
 
-                    if (buffer.hasOwnProperty("emptySearch")) {
-                        logger.info(`JOB completed-- empty search\n${utils.format(buffer.emptySearch)}`);
-                        ans.data = ["Search yielded no results.", buffer.emptySearch];   
-                    } else {
-                        let res = buffer.out;
-                        logger.info(`JOB completed\n${utils.format(buffer.out)}`);
-                     //   ans.data = [res.data, res.not_int,  res.tag, res.number_hits];
-                         ans.data = [res.data, res.not_int,  res.tag, res.number_hits];
-                    
-                    }
-                    socket.emit('resultsAllGenomes', ans);
-                
+                        }
+                        socket.emit('resultsAllGenomes', ans);
                 });
-            
+
         });
     });
 
     }); // io closure
 
 }); // jm closure
+
