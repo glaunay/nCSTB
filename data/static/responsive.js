@@ -512,7 +512,7 @@ function displaySequence(){
 
 function submitSpecificGene(){
 	$("#Tabselection").hide();
-	
+
 	$('#spec_tips').hide();
 	$('#ShowSeq').hide();
 	$('#tree').hide()
@@ -697,7 +697,7 @@ function setupVariable(){
 
 
 $(document).ready(function(){
-	
+
 	setupVariable()
 	setupAll()
 
@@ -728,7 +728,7 @@ $(document).ready(function(){
 	$('#submit_trees').click(function(){
 		submitTree()
 	})
-		
+
 
 	$('#confirm_y').click(function(){
 		confirmSelection('')
@@ -766,7 +766,7 @@ $(document).ready(function(){
 
 	$('#next').click(function(){
 		displaySequence()
-		
+
 	})
 
 	$('#tree_include_sg').on("changed.jstree",function(e,data){
@@ -800,7 +800,7 @@ $(document).ready(function(){
 		else{
 			submitSpecificGene()
 		}
-		
+
 	})
 
 
@@ -812,4 +812,22 @@ function reloadpage() {
     location.reload();
 }
 
-
+// change active link for tab-nav and change results to show
+function clickNav(d) {
+  // check if clicked nav is not the active one
+  if(d.className != "nav-link active"){
+    let allNav = document.querySelectorAll(".nav-link");
+    // all nav-tab set to not active
+    allNav.forEach(e => e.className="nav-link");
+    // active the one clicked
+    d.className="nav-link active";
+    // show/hide results
+    if (d.id == "graphicResult") {
+      document.querySelector("result-page").style.display="block";
+      document.querySelector("#ResTable").style.display="none";
+    } else if (d.id == "tableResult") {
+      document.querySelector("result-page").style.display="none";
+      document.querySelector("#ResTable").style.display="block";
+    }
+  }
+}

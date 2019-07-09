@@ -6,10 +6,10 @@
 
 		<title>CSTB - Crispr Search Tool for Bacteria</title>
 		<meta http-equiv="content-type" content="text/html; charset=utf-8">
-		
-		<!-- 
+
+		<!--
 		<script type="text/javascript">
-  			var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}; 
+  			var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 		</script>
 		-->
 
@@ -19,7 +19,7 @@
 		<!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
 		<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.js"></script> <!-- backup -->
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-	<script src="@mmsb/result_page/dist/mycomponent.js"></script>        
+	<script src="@mmsb/result_page/dist/mycomponent.js"></script>
 <script type="text/javascript" charset="utf-8">
             var socket = io.connect('http://crispr-dev.ibcp.fr:80'); //3002
             socket.on('connect', function() {
@@ -101,6 +101,11 @@
 
 		#error{
 			color: red;
+		}
+
+		.nav-link:hover{
+		  background:rgba(42, 186, 55,0.2);
+		  color: green
 		}
 
 
@@ -312,13 +317,22 @@
 			<!-- <p id="result"></p> -->
 		</div>
 
-		<div id="Result" style="display:none">
-			<a id='result-file' class="w3-btn w3-green"></a><button class="w3-btn w3-red" onclick="reloadpage()"><b>New Search</b></button>WARNING: Clicking on 'New Search' will lose the displayed information. Please download the results first.
-				<!-- Table of results -->
-			<div class="w3-panel w3-pale-green w3-bottombar w3-border w3-border-green w3-center" id="infos">
-			</div>
-			<table id="ResTable" style="width:100%">
-			</table>
+		<div id="Result" style="display:block">
+		  <a id='result-file' class="w3-btn w3-green"></a><button class="w3-btn w3-red" onclick="reloadpage()"><b>New Search</b></button>WARNING: Clicking on 'New Search' will lose the displayed information. Please download the results first.
+		    <!-- Table of results -->
+		  <div class="w3-panel w3-pale-green w3-bottombar w3-border w3-border-green w3-center" id="infos">
+		  </div>
+		  <ul class="nav nav-tabs">
+		  <li class="nav-item">
+		    <a class="nav-link active" id="graphicResult" href="#" onclick="clickNav(this)">Graphic</a>
+		  </li>
+		  <li class="nav-item">
+		    <a class="nav-link" id="tableResult" href="#" onclick="clickNav(this)">Table</a>
+		  </li>
+		</ul>
+		  <!-- METTRE LES TABS ICI FAIRE ATTENTION LORS DE LA CREATION DE RESULT-PAGE -->
+		  <table id="ResTable" style="width:100%; display:none">
+		  </table>
 		</div>
 
 		<div id="NoResult" style="display:none">
