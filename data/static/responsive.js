@@ -434,7 +434,7 @@ function treatResults(results){
 		let gi=data[5];
 		let obj = res;
 		let node = document.createElement("result-page");
-		let resDiv = document.querySelector("#Result");
+		let resDiv = document.querySelector("#ResGraph");
 		resDiv.appendChild(node);
 		node.setAttribute( "complete_data", JSON.stringify(res) );
 		node.setAttribute( "all_data", JSON.stringify(data_card) );
@@ -449,6 +449,7 @@ function treatResults(results){
 		if (parseInt(number_hits)>10000){
 			infos+=' (only the best 10 000 are written to this file).</p>'
 		}
+    infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
 		if (not_in!=''){
 			infos+='<p> All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in;
 		}
@@ -571,6 +572,7 @@ function treatResultsSG(msg){
 			infos+='(only the best 10 000 are written to this file). '
 		}
 		infos+=number_on_gene+' of this hits hybridises at least one time with the subject gene (or an homologous). </p>'
+    infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
 		if (not_in!=''){
 			infos+='<p>All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in+'.</p>';
 		}
@@ -829,5 +831,18 @@ function clickNav(d) {
       document.querySelector("result-page").style.display="none";
       document.querySelector("#ResTable").style.display="block";
     }
+  }
+}
+
+function clickDrop(d) {
+  if(d.id.split(' ')[1] == "off") {
+    d.id = "drop_not_in on";
+    document.querySelector("#infos>p:nth-child(2)").style.display="block";
+    d.innerHTML="arrow_drop_up";
+
+  } else {
+    d.id = "drop_not_in off";
+    document.querySelector("#infos>p:nth-child(2)").style.display="none";
+    d.innerHTML="arrow_drop_down";
   }
 }

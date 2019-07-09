@@ -2,25 +2,22 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<!-- w3-css loading -->
-
 		<title>CSTB - Crispr Search Tool for Bacteria</title>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
 		<meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
 
-		<!-- Code for fetching jquery and jstree online [requires internet connection]-->
-		<!-- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script> -->
-		<!-- <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.1.js"></script> <!-- backup -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
-		<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-
 		<!-- bootstrap -->
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
+		<!-- component for result page -->
+		<script type="module" src="http://crispr-dev.ibcp.fr/@mmsb/result_page/dist/mycomponent/mycomponent.esm.js"></script>
+		<script nomodule="" src="http://crispr-dev.ibcp.fr/@mmsb/result_page/dist/mycomponent/mycomponent.js"></script>
 
-		<script src="@mmsb/result_page/dist/mycomponent.js"></script>
+		<!-- socket IO -->
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 		<script type="text/javascript" charset="utf-8">
 	    var socket = io.connect('http://crispr-dev.ibcp.fr:80'); //3002
 	    socket.on('connect', function() {
@@ -29,12 +26,14 @@
 	    });
     </script>
 
+		<!-- JStree -->
 		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"></script>
 		<script src="./responsive.js"></script>
 
+		<!-- CSS -->
 		<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css">
-
+		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 		<!-- modif begin -->
@@ -101,6 +100,28 @@
 		  color: green
 		}
 
+		.nav-link{
+			color: black
+		}
+
+		a {
+			color: white;
+			font-weight: bold;
+		}
+
+		a:hover{
+			color: white;
+			font-weight: bold;
+			text-decoration: none;
+		}
+
+		#infos>p:nth-child(2){
+			display: none;
+		}
+
+		#drop_not_in:hover{
+			cursor: pointer;
+		}
 
 	</style>
 
@@ -311,9 +332,11 @@
 		</div>
 
 		<div id="Result" style="display:none">
+
 		  <a id='result-file' class="w3-btn w3-green"></a><button class="w3-btn w3-red" onclick="reloadpage()"><b>New Search</b></button>WARNING: Clicking on 'New Search' will lose the displayed information. Please download the results first.
 		    <!-- Table of results -->
 		  <div class="w3-panel w3-pale-green w3-bottombar w3-border w3-border-green w3-center" id="infos">
+
 		  </div>
 		  <ul class="nav nav-tabs">
 		  <li class="nav-item">
@@ -323,7 +346,8 @@
 		    <a class="nav-link" id="tableResult" href="#" onclick="clickNav(this)">Table</a>
 		  </li>
 		</ul>
-		  <!-- METTRE LES TABS ICI FAIRE ATTENTION LORS DE LA CREATION DE RESULT-PAGE -->
+			<div id="ResGraph"style="background:white" >
+			</div>
 		  <table id="ResTable" style="width:100%; display:none">
 		  </table>
 		</div>
