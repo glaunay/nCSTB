@@ -157,7 +157,7 @@ _io.on('connection', (socket)=>{
                     logger.info(`JOB completed-- Found stuff`);
                     logger.info(`${utils.inspect(buffer, false, null)}`);
                     let res = buffer.out;
-                    ans.data = [res.data, res.not_in,  res.tag, res.number_hits, res.data_card, res.gi];
+                    ans.data = [res.data, res.not_in,  res.tag, res.number_hits, res.data_card, res.gi, res.gene];
                 }
                 socket.emit('resultsSpecific', ans);
             });

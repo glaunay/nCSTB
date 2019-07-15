@@ -2,7 +2,7 @@
 socket.on("resultsAllGenomes", function(data) {
     console.log("Showing All Genomes results");
     console.dir(data);
-    treatResults(data);
+    treatResults(data, false);
 });
 
 //var socket = io();
@@ -15,7 +15,7 @@ socket.on("submitted", function(data) {
 socket.on("resultsSpecific", function(data) {
     console.log("Showing Specific results");
     console.dir(data);
-    treatResults(data);
+    treatResults(data, true);
 });
 
 
@@ -416,11 +416,11 @@ function submitSetupAllGenome(){
 
 }
 
-function treatResults(results){
+function treatResults(results, isSg){
 	$("#Waiting").hide();
     var data = results.data;
 
-	if (results.data.length == 6){
+	if (results.data.length >= 6){
 
 		$('#Result').show()
 		res=data[0];
@@ -429,13 +429,21 @@ function treatResults(results){
 		number_hits=data[3];
 		let data_card =data[4];
 		let gi=data[5];
+    let node = document.createElement("result-page");
+    let resDiv = document.querySelector("#ResGraph");
+    resDiv.appendChild(node);
+
+    if(isSg){
+      let gene = data[6];
+      node.setAttribute("gene", gene);
+    }
 		let obj = res;
-		let node = document.createElement("result-page");
-		let resDiv = document.querySelector("#ResGraph");
-		resDiv.appendChild(node);
+
 		node.setAttribute( "complete_data", JSON.stringify(res) );
 		node.setAttribute( "all_data", JSON.stringify(data_card) );
 		node.setAttribute("org_names", gi);
+
+
 		console.log("bip");
 		console.dir(res);
 		//var obj = JSON.parse(res);

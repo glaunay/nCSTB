@@ -130,7 +130,8 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
                         logger.info(`JOB completed-- Found stuff`);
                         logger.info(`${utils.inspect(buffer, false, null)}`);
                         let res = buffer.out;
-                        ans.data = [res.data, res.not_in, res.tag, res.number_hits, res.number_on_gene];
+                        logger.info(res.gene);
+                        ans.data = [res.data, res.not_in, res.tag, res.number_hits, res.data_card, res.gi, res.gene];
                     }
                     socket.emit('resultsSpecific', ans);
                 });
