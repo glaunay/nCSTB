@@ -1,4 +1,4 @@
-//var socket = io();
+// last modif at 16 dec 2016 01:18
 socket.on("resultsAllGenomes", function(data) {
     console.log("Showing All Genomes results");
     console.dir(data);
@@ -18,125 +18,22 @@ socket.on("resultsSpecific", function(data) {
     treatResults(data, true);
 });
 
-
-// last modif at 16 dec 2016 01:18
-function verifyFasta(seq){
-	var error='no error'
-	var authorized=['A','T','C','G','a','t','c','g']
-	var nbre_seq=0
-	var seq_finale=''
-	var sequence_split=seq.split('\n')
-	for(i=0;i<sequence_split.length;i++){
-		if (sequence_split[i][0]=='>'){
-			nbre_seq+=1
-			if(nbre_seq>1){
-				error='More than 1 sequence'
-				return [error,0]
-			}
-		}
-		else{
-			for (j=0;j<sequence_split[i].length;j++){
-				if (!(authorized.includes(sequence_split[i][j]))){
-					error="Wrong sequence. Only nucleotide characters authorized"
-					return [error,0]
-				}
-				else{
-					seq_finale+=sequence_split[i][j]
-				}
-			}
-
-		}
-	}
-	return [error,seq_finale]
-}
-
-function loadFile(id){
-			if ( ! window.FileReader ) {
-				return alert( 'FileReader API is not supported by your browser.' );
-			}
-			var $i = $(id), // Put file input ID here
-				input = $i[0];
-			if ( input.files && input.files[0] ) {
-				file = input.files[0]; // The file
-				fr = new FileReader(); // FileReader instance
-
-				fr.readAsText( file );
-				fr.onload = function () {
-					// Do stuff on onload, use fr.result for contents of file
-					sequence=fr.result
-					$('#seq').val(sequence)
-				};
-			}
-			else {
-				// Handle errors here
-				alert( "File not selected or browser incompatible." )
-			}
-}
-
-function display_download(tag) {
-    onDownload(tag)
-    return;
-}
-
-function onDownload(data) {
-    //var to_display=encodeURIComponent(data)
-    //$('#result-file').html('<a href="data:application/txt;charset=utf-8,'+to_display+'"download="results.txt">Download results</a>')
-    $('#result-file').html('<a href="download/' + data +'" >Download results</a>')
-}
-
-function writeResults(obj){
-	var out=''
-	for (i=0;i<obj.length;i++){
-		line_seq=0
-		seq=obj[i].sequence
-		number_genomes=obj[i].occurences.length
-		for(j=0;j<number_genomes;j++){
-			line_genome=0
-			org=obj[i].occurences[j].org
-			org_split=org.split(' ')
-			ref_org=org_split.pop()
-			number_ref=obj[i].occurences[j].all_ref.length
-			for(k=0;k<number_ref;k++){
-				ref=obj[i].occurences[j].all_ref[k].ref
-				number_coords=obj[i].occurences[j].all_ref[k].coords.length
-				line_genome+=number_coords
-				line_seq+=number_coords
-				for(l=0;l<number_coords;l++){
-					coord=obj[i].occurences[j].all_ref[k].coords[l]
-					print_coord='<td>'+coord+'</td></tr>'
-					out=print_coord+out
-				}
-				print_ref='<td rowspan="'+number_coords+'">' + ref + '</td>'
-				out=print_ref+out
-			}
-			print_org='<td rowspan="'+line_genome+'">' + org_split.join(' ') + '</td>'
-			out=print_org+out
-		}
-		print_seq='<td rowspan="'+line_seq+'" valign="top">' + seq + '</td>'
-		out=print_seq+out
-
-	}
-	var header='<tr class = "w3-light-grey"> <th> sgRNA sequence </th> <th> Organism(s) </th> <th colspan=2> Coordinates </th> </tr>'
-	out=header+out
-	return out
-
-}
-
-
-function displayTreeIn(suffix){
-
+// *********************************************
+//              *  TREE FEATURES *
+// *********************************************
+function displayTree(suffix, searchType, treeType){
 	var to = false;
-	$('#search_in'+suffix).keyup(function () {
+	$(searchType+suffix).keyup(function () {
 		if(to) { clearTimeout(to); }
 		to = setTimeout(function () {
-			var v = $('#search_in'+suffix).val();
-			$('#tree_include'+suffix).jstree().search(v);
+			var v = $(searchType+suffix).val();
+			$(treeType+suffix).jstree().search(v);
 		}, 250);
 	});
 	$.jstree.defaults.search.show_only_matches=true;
 	// tree building
 
-	$('#tree_include'+suffix).jstree({
+	$(treeType+suffix).jstree({
 		"core" : {
 			'data' : { "url" : "./jsontree.json", "dataType" : "json"},
 			'themes' : [
@@ -149,37 +46,36 @@ function displayTreeIn(suffix){
 		},
 		"plugins" : [ "wholerow" , "checkbox" , "search" , "dnd" , "types"]
 	});
-	$('#tree_include'+suffix).jstree().show_dots();
+	$(treeType+suffix).jstree().show_dots();
 }
 
-function displayTreeNotIn(suffix){
 
-	var to = false;
-	$('#search_notin'+suffix).keyup(function () {
-		if(to) { clearTimeout(to); }
-		to = setTimeout(function () {
-			var v = $('#search_notin'+suffix).val();
-			$('#tree_exclude'+suffix).jstree().search(v);
-		}, 250);
-	});
-	$.jstree.defaults.search.show_only_matches=true;
-	// tree building
+function selectOntree(data, treeName, reverseTree, idList, disabledNode, excludeReverse, j1, j2){
+	for(m = 0, n = idList.length; m < n; m++) {
+		disabledNode.push(idList[m].replace(j1,j2));
+	}
+	$(reverseTree).jstree().enable_node(disabledNode);
 
-	$('#tree_exclude'+suffix).jstree({
-		"core" : {
-			'data' : { "url" : "./jsontree.json", "dataType" : "json"},
-			'themes' : [
-				{"dots" : true}
-			],
-			'animation' : false
-		},
-		"checkbox" : {
-			"keep_selected_style" : false
-		},
-		"plugins" : [ "wholerow" , "checkbox" , "search" , "dnd" , "types"]
-	});
-	$('#tree_exclude'+suffix).jstree().show_dots();
+	idList = data.selected
+	disabledNode = []
+	for(m = 0, n = idList.length; m < n; m++) {
+		disabledNode.push(idList[m].replace(j1,j2));
+		}
+	$(reverseTree).jstree().disable_node(disabledNode);
+
+	selectNode = [];
+	for(i = 0, j = idList.length; i < j; i++) {
+		selectNode.push(data.instance.get_node(idList[i]).text);
+	};
+
+	noSelected=[]
+	for(i=0;i<excludeReverse.length;i++){
+		noSelected.push(excludeReverse[i].replace(j2,j1))
+	}
+	$(treeName).jstree(true).uncheck_node(noSelected);
+  console.dir(idList)
 }
+
 
 
 function selectOnTreeInAG(data){
@@ -298,7 +194,7 @@ function resetTree(suffix){
 	//includeNameList=[]
 }
 
-function submitTree(){
+function submitTree(includeIdListAG){
 	if(includeIdListAG.length==0){
 		window.alert('You have to choose at least one included genome')
 		return
@@ -311,7 +207,7 @@ function submitTree(){
 	$('#confirm_n').show()
 	$('#ShowIN').show()
 	$('#ShowNOTIN').show()
-	displaySelectionAG()
+	displaySelectionAG(includeIdListAG)
 }
 
 function submitTreeSG(){
@@ -333,7 +229,216 @@ function submitTreeSG(){
 	displaySelectionSG()
 }
 
-function displaySelectionAG(){
+
+// *********************************************
+//            *  TREAT RESULTS *
+// *********************************************
+function display_download(tag) {
+    onDownload(tag)
+    return;
+}
+
+function onDownload(data) {
+    $('#result-file').html('<a href="download/' + data +'" >Download results</a>')
+}
+
+function writeResults(obj){
+	var out=''
+	for (i=0;i<obj.length;i++){
+		line_seq=0
+		seq=obj[i].sequence
+		number_genomes=obj[i].occurences.length
+		for(j=0;j<number_genomes;j++){
+			line_genome=0
+			org=obj[i].occurences[j].org
+			org_split=org.split(' ')
+			ref_org=org_split.pop()
+			number_ref=obj[i].occurences[j].all_ref.length
+			for(k=0;k<number_ref;k++){
+				ref=obj[i].occurences[j].all_ref[k].ref
+				number_coords=obj[i].occurences[j].all_ref[k].coords.length
+				line_genome+=number_coords
+				line_seq+=number_coords
+				for(l=0;l<number_coords;l++){
+					coord=obj[i].occurences[j].all_ref[k].coords[l]
+					print_coord='<td>'+coord+'</td></tr>'
+					out=print_coord+out
+				}
+				print_ref='<td rowspan="'+number_coords+'">' + ref + '</td>'
+				out=print_ref+out
+			}
+			print_org='<td rowspan="'+line_genome+'">' + org_split.join(' ') + '</td>'
+			out=print_org+out
+		}
+		print_seq='<td rowspan="'+line_seq+'" valign="top">' + seq + '</td>'
+		out=print_seq+out
+
+	}
+	var header='<tr class = "w3-light-grey"> <th> sgRNA sequence </th> <th> Organism(s) </th> <th colspan=2> Coordinates </th> </tr>'
+	out=header+out
+	return out
+
+}
+function treatResults(results, isSg){
+	$("#Waiting").hide();
+    var data = results.data;
+
+	if (results.data.length >= 6){
+
+		$('#Result').show()
+		res=data[0];
+    not_in=data[1] ? data[1] : '';
+		tag=data[2];
+		number_hits=data[3];
+		let data_card =data[4];
+		let gi=data[5];
+    let node = document.createElement("result-page");
+    let resDiv = document.querySelector("#ResGraph");
+    resDiv.appendChild(node);
+
+    if(isSg){
+      let gene = data[6];
+      node.setAttribute("gene", gene);
+    }
+		let obj = res;
+
+		node.setAttribute( "complete_data", JSON.stringify(res) );
+		node.setAttribute( "all_data", JSON.stringify(data_card) );
+		node.setAttribute("org_names", gi);
+
+
+		console.log("bip");
+		console.dir(res);
+		//var obj = JSON.parse(res);
+		var infos='<p>' +number_hits + ' hits have been found for this research.' ;
+		if (parseInt(number_hits)>100){
+			infos+='. Only the best 100 are written below. Download the result file to get more hits.'
+		}
+		if (parseInt(number_hits)>10000){
+			infos+=' (only the best 10 000 are written to this file).</p>'
+		}
+    infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
+		if (not_in!=''){
+			infos+='<p> All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in;
+		}
+		else{
+			infos+='<p> No excluded genomes selected.</p>'
+		}
+		out=writeResults(obj)
+		$('#infos').html(infos)
+		$("#ResTable").html(out);
+		display_download(tag)
+
+    }
+	else{ // Check it works properly
+		$("#NoResult").show();
+		infos='<p>'+data[0]+'</p> <p> '+data[1]+'</p>'
+		$("#no_result").html(infos);
+	}
+}
+
+
+// *********************************************
+//            *  TREAT FASTA FILE *
+// *********************************************
+function verifyFasta(seq){
+	var error='no error'
+	var authorized=['A','T','C','G','a','t','c','g']
+	var nbre_seq=0
+	var seq_finale=''
+	var sequence_split=seq.split('\n')
+	for(i=0;i<sequence_split.length;i++){
+		if (sequence_split[i][0]=='>'){
+			nbre_seq+=1
+			if(nbre_seq>1){
+				error='More than 1 sequence'
+				return [error,0]
+			}
+		}
+		else{
+			for (j=0;j<sequence_split[i].length;j++){
+				if (!(authorized.includes(sequence_split[i][j]))){
+					error="Wrong sequence. Only nucleotide characters authorized"
+					return [error,0]
+				}
+				else{
+					seq_finale+=sequence_split[i][j]
+				}
+			}
+
+		}
+	}
+	return [error,seq_finale]
+}
+
+function loadFile(id){
+			if ( ! window.FileReader ) {
+				return alert( 'FileReader API is not supported by your browser.' );
+			}
+			var $i = $(id), // Put file input ID here
+				input = $i[0];
+			if ( input.files && input.files[0] ) {
+				file = input.files[0]; // The file
+				fr = new FileReader(); // FileReader instance
+
+				fr.readAsText( file );
+				fr.onload = function () {
+					// Do stuff on onload, use fr.result for contents of file
+					sequence=fr.result
+					$('#seq').val(sequence)
+				};
+			}
+			else {
+				// Handle errors here
+				alert( "File not selected or browser incompatible." )
+			}
+}
+
+function treatFastaFile(){
+	$('a[name=error-load]').hide()
+	fastaname=$("#fasta-file").val()
+
+	if(fastaname==''){
+		$('a[name=error-load]').show()
+		$('a[name=error-load]').html('No file selected')
+		return
+	}
+	else{
+		loadFile('#fasta-file')
+	}
+}
+
+function displaySequence(){
+	sequence=$('#seq').val()
+	error_fasta=verifyFasta(sequence)
+	if(error_fasta[0]!="no error"){
+		window.alert('Sequence not in fasta format')
+		return false
+	}
+	final_sequence=error_fasta[1]
+	if(final_sequence==''){
+		window.alert('Empty sequence')
+		return false
+	}
+	$('#ShowSeq').show()
+	$('#ShowSeq').html("<h5 class='w3-container w3-light-green'>Your query:</h5><div class='w3-margin'>"+sequence+"</div>")
+	$('#spec_tips').hide()
+	$('a[name=error-fasta]').hide()
+	$("#Sequenceupload").hide()
+	$('#next').hide()
+	$('#list').hide()
+	$('#changeSeq').show()
+	$('#tree').show()
+	$('#reset_trees_sg').show()
+	$('#submit_trees_sg').show()
+	resetTree('_sg')
+
+}
+
+// *********************************************
+//        *  DISPLAY & TREAT SELECTIONS  *
+// *********************************************
+function displaySelectionAG(includeIdListAG){
 	for (i=0;i<includeNameListAG.length;i++){
 		node=includeIdListAG[i]
 		if ($('#tree_include').jstree().is_leaf(node)){
@@ -400,8 +505,10 @@ function clearListView(suffix){
 		document.getElementById('NotInView'+suffix).options[0].remove()
 	}
 }
-// Modif end
 
+// *********************************************
+//            *  SUBMIT PARAMETERS *
+// *********************************************
 function submitSetupAllGenome(){
 	$('#Tabselection').hide()
 	$('#allg_tips').hide()
@@ -413,106 +520,6 @@ function submitSetupAllGenome(){
 	GNOTIN=JSON.stringify(excludeNameListAG);
 	PAM=$("select[name='pam_AllG'] > option:selected").val();
 	SGRNA=$("select[name='sgrna-length_AllG'] > option:selected").val();
-
-}
-
-function treatResults(results, isSg){
-	$("#Waiting").hide();
-    var data = results.data;
-
-	if (results.data.length >= 6){
-
-		$('#Result').show()
-		res=data[0];
-    not_in=data[1] ? data[1] : '';
-		tag=data[2];
-		number_hits=data[3];
-		let data_card =data[4];
-		let gi=data[5];
-    let node = document.createElement("result-page");
-    let resDiv = document.querySelector("#ResGraph");
-    resDiv.appendChild(node);
-
-    if(isSg){
-      let gene = data[6];
-      node.setAttribute("gene", gene);
-    }
-		let obj = res;
-
-		node.setAttribute( "complete_data", JSON.stringify(res) );
-		node.setAttribute( "all_data", JSON.stringify(data_card) );
-		node.setAttribute("org_names", gi);
-
-
-		console.log("bip");
-		console.dir(res);
-		//var obj = JSON.parse(res);
-		var infos='<p>' +number_hits + ' hits have been found for this research.' ;
-		if (parseInt(number_hits)>100){
-			infos+='. Only the best 100 are written below. Download the result file to get more hits.'
-		}
-		if (parseInt(number_hits)>10000){
-			infos+=' (only the best 10 000 are written to this file).</p>'
-		}
-    infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
-		if (not_in!=''){
-			infos+='<p> All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in;
-		}
-		else{
-			infos+='<p> No excluded genomes selected.</p>'
-		}
-		out=writeResults(obj)
-		$('#infos').html(infos)
-		$("#ResTable").html(out);
-		display_download(tag)
-
-    }
-	else{ // Check it works properly
-		$("#NoResult").show();
-		infos='<p>'+data[0]+'</p> <p> '+data[1]+'</p>'
-		$("#no_result").html(infos);
-	}
-}
-
-
-function treatFastaFile(){
-	$('a[name=error-load]').hide()
-	fastaname=$("#fasta-file").val()
-
-	if(fastaname==''){
-		$('a[name=error-load]').show()
-		$('a[name=error-load]').html('No file selected')
-		return
-	}
-	else{
-		loadFile('#fasta-file')
-	}
-}
-
-function displaySequence(){
-	sequence=$('#seq').val()
-	error_fasta=verifyFasta(sequence)
-	if(error_fasta[0]!="no error"){
-		window.alert('Sequence not in fasta format')
-		return false
-	}
-	final_sequence=error_fasta[1]
-	if(final_sequence==''){
-		window.alert('Empty sequence')
-		return false
-	}
-	$('#ShowSeq').show()
-	$('#ShowSeq').html("<h5 class='w3-container w3-light-green'>Your query:</h5><div class='w3-margin'>"+sequence+"</div>")
-	$('#spec_tips').hide()
-	$('a[name=error-fasta]').hide()
-	$("#Sequenceupload").hide()
-	$('#next').hide()
-	$('#list').hide()
-	$('#changeSeq').show()
-	$('#tree').show()
-	$('#reset_trees_sg').show()
-	$('#submit_trees_sg').show()
-	resetTree('_sg')
 
 }
 
@@ -594,10 +601,10 @@ function setupAll(){
 	$('#next').hide()
 	$('#other_parameters_sg').hide()
 	$('#ShowSeq').hide()
-	displayTreeIn('')
-	displayTreeNotIn('')
-	displayTreeIn('_sg')
-	displayTreeNotIn('_sg')
+	displayTree('', '#search_in', '#tree_include')
+	displayTree('', '#search_notin', '#tree_exclude')
+	displayTree('_sg', '#search_in', '#tree_include')
+	displayTree('_sg', '#search_notin', '#tree_exclude')
 }
 
 function setupAllGenome(){
@@ -672,21 +679,43 @@ $(document).ready(function(){
 		setupAllGenome()
 		resetTree('')
 	})
+//  TREE
+	// $('#tree_include').on("changed.jstree",function(e,data){
+	// 	selectOntree(data, '#tree_include', '#tree_exclude', includeIdListAG, disabledExcAG, excludeIdListAG, 'j1', 'j2')
+  //   console.dir(includeIdListAG)
+	// })
+  //
+	// $('#tree_exclude').on("changed.jstree", function (e, data) {	// replace changed for onclicked like below
+	// 	selectOntree(data, '#tree_exclude', '#tree_include', excludeIdListAG, disabledIncAG, includeIdListAG, 'j2', 'j1')
+	// })
+  //
+  // $('#tree_include_sg').on("changed.jstree",function(e,data){
+	// 	selectOntree(data, '#tree_include_sg', '#tree_exclude_sg', includeIdListSG, disabledExcSG, excludeIdListSG, 'j3', 'j4')
+	// })
+  //
+	// $('#tree_exclude_sg').on("changed.jstree",function(e,data){
+	// 	selectOntree(data, '#tree_exclude_sg', '#tree_include_sg', excludeIdListSG, disabledIncSG, includeIdListSG, 'j4', 'j3')
+	// })
+//   console.dir(includeIdListAG)
+  $('#tree_include').on("changed.jstree",function(e,data){
+  selectOnTreeInAG(data)
+})
 
-	$('#tree_include').on("changed.jstree",function(e,data){
-		selectOnTreeInAG(data)
-	})
-
-	$('#tree_exclude').on("changed.jstree", function (e, data) {	// replace changed for onclicked like below
-		selectOnTreeNotInAG(data)
-	})
-
+$('#tree_exclude').on("changed.jstree", function (e, data) {	// replace changed for onclicked like below
+  selectOnTreeNotInAG(data)
+})
+$('#tree_include_sg').on("changed.jstree",function(e,data){
+  selectOnTreeInSG(data)
+})
+$('#tree_exclude_sg').on("changed.jstree",function(e,data){
+  selectOnTreeNotInSG(data)
+})
 	$('#reset_trees').click(function(){
 		resetTree('')
 	})
 
 	$('#submit_trees').click(function(){
-		submitTree()
+		submitTree(includeIdListAG)
 	})
 
 
@@ -729,12 +758,7 @@ $(document).ready(function(){
 
 	})
 
-	$('#tree_include_sg').on("changed.jstree",function(e,data){
-		selectOnTreeInSG(data)
-	})
-	$('#tree_exclude_sg').on("changed.jstree",function(e,data){
-		selectOnTreeNotInSG(data)
-	})
+
 
 
 	$('#reset_trees_sg').click(function(){
