@@ -15,7 +15,7 @@ socket.on("submitted", function(data) {
 socket.on("resultsSpecific", function(data) {
     console.log("Showing Specific results");
     console.dir(data);
-    treatResultsSG(data);
+    treatResults(data);
 });
 
 
@@ -417,9 +417,6 @@ function submitSetupAllGenome(){
 }
 
 function treatResults(results){
-
-
-
 	$("#Waiting").hide();
     var data = results.data;
 
@@ -427,7 +424,7 @@ function treatResults(results){
 
 		$('#Result').show()
 		res=data[0];
-		not_in=data[1];
+    not_in=data[1] ? data[1] : '';
 		tag=data[2];
 		number_hits=data[3];
 		let data_card =data[4];
@@ -550,13 +547,19 @@ function paramSpecificGene(){
 
 function treatResultsSG(msg){
 	let data = msg.data;
-	if (data.length==5){
-		resultFound=1
-		res=data[0];
-		not_in=data[1] ? data[1] : '';
-		tag=data[2];
-		number_hits=data[3]
-		number_on_gene=data[4]
+	if (data.length==6){
+    res=data[0];
+    not_in=data[1] ? data[1] : '';
+    tag=data[2];
+    number_hits=data[3];
+    let data_card =data[4];
+    let gi=data[5];
+    let node = document.createElement("result-page");
+    let resDiv = document.querySelector("#ResGraph");
+    resDiv.appendChild(node);
+    node.setAttribute( "complete_data", JSON.stringify(res) );
+    node.setAttribute( "all_data", JSON.stringify(data_card) );
+    node.setAttribute("org_names", gi);
 	}
 	else {
 		resultFound=0;
@@ -571,7 +574,6 @@ function treatResultsSG(msg){
 		if (parseInt(number_hits)>10000){
 			infos+='(only the best 10 000 are written to this file). '
 		}
-		infos+=number_on_gene+' of this hits hybridises at least one time with the subject gene (or an homologous). </p>'
     infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
 		if (not_in!=''){
 			infos+='<p>All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in+'.</p>';
