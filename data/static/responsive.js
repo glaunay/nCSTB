@@ -553,58 +553,6 @@ function paramSpecificGene(){
 
 }
 
-function treatResultsSG(msg){
-	let data = msg.data;
-	if (data.length==6){
-    res=data[0];
-    not_in=data[1] ? data[1] : '';
-    tag=data[2];
-    number_hits=data[3];
-    let data_card =data[4];
-    let gi=data[5];
-    let node = document.createElement("result-page");
-    let resDiv = document.querySelector("#ResGraph");
-    resDiv.appendChild(node);
-    node.setAttribute( "complete_data", JSON.stringify(res) );
-    node.setAttribute( "all_data", JSON.stringify(data_card) );
-    node.setAttribute("org_names", gi);
-	}
-	else {
-		resultFound=0;
-	}
-	if(resultFound==1){
-		//var obj=JSON.parse(res);
-		let obj = res;
-		var infos='<p>' + number_hits + ' hits have been found for this research. ' ;
-		if (parseInt(number_hits)>100){
-			infos+='Only the best 100 are written below. Download the result file to get more hits. '
-		}
-		if (parseInt(number_hits)>10000){
-			infos+='(only the best 10 000 are written to this file). '
-		}
-    infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
-		if (not_in!=''){
-			infos+='<p>All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in+'.</p>';
-		}
-		else{
-			infos+='<p>No excluded genomes selected. </p>'
-		}
-		out=writeResults(obj)
-		$("#Waiting").fadeOut();
-		$("#Result").show();
-
-		$('#infos').html(infos)
-		$("#ResTable").html(out);
-		display_download(tag)
-	}
-	else{		//Display no matching results output.
-		$("#Waiting").hide();
-		$("#NoResult").show();
-		infos='<p>'+data[0]+'</p> <p> '+data[1]+'</p>'
-		$("#no_result").html(infos);
-	}
-}
-
 function error_gestion(){
 	var errors=false
 	try{
@@ -856,3 +804,26 @@ function clickDrop(d) {
     d.innerHTML="arrow_drop_down";
   }
 }
+
+window.addEventListener("sgDataSection", event => {
+  console.dir("Houla")
+  let node = document.querySelector("linear-card");
+  if(node == null){
+    node = document.createElement("linear-card");
+    let resDiv = document.querySelector("#ResGraph");
+    resDiv.appendChild(node);
+  } else{
+    node.remove();
+    if(event.detail["gene"] != ""){
+      node = document.createElement("linear-card");
+      let resDiv = document.querySelector("#ResGraph");
+      resDiv.appendChild(node);
+    }
+  }
+  if(event.detail["gene"] != ""){
+    node.setAttribute("width_bar", '90%');
+    node.setAttribute("all_sgrna", event.detail["allSgrna"]);
+    node.setAttribute("gene", event.detail["gene"]);
+  }
+
+})

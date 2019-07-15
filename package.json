@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/glaunay/nCSTB#readme",
   "dependencies": {
+    "@mmsb/linear-card": "0.0.4",
     "@mmsb/result_page": "0.0.4",
     "@types/express": "^4.16.0",
     "@types/node": "^10.5.5",
