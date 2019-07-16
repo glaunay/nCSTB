@@ -298,7 +298,7 @@ function treatResults(results, isSg){
 
     if(isSg){
       let gene = data[6];
-      node.setAttribute("gene", gene);
+      node.setAttribute("gene", JSON.stringify(gene));
     }
 		let obj = res;
 
@@ -829,25 +829,25 @@ function clickDrop(d) {
   }
 }
 
-window.addEventListener("sgDataSection", event => {
-  console.dir("Houla")
-  let node = document.querySelector("linear-card");
-  if(node == null){
-    node = document.createElement("linear-card");
-    let resDiv = document.querySelector("#ResGraph");
-    resDiv.appendChild(node);
-  } else{
-    node.remove();
-    if(event.detail["gene"] != ""){
-      node = document.createElement("linear-card");
-      let resDiv = document.querySelector("#ResGraph");
-      resDiv.appendChild(node);
-    }
-  }
-  if(event.detail["gene"] != ""){
-    node.setAttribute("width_bar", '90%');
-    node.setAttribute("all_sgrna", event.detail["allSgrna"]);
-    node.setAttribute("gene", event.detail["gene"]);
-  }
-
-})
+// window.addEventListener("sgDataSection", event => {
+//   console.dir("Houla")
+//   let node = document.querySelector("linear-card");
+//   if(node == null){
+//     node = document.createElement("linear-card");
+//     let resDiv = document.querySelector("#ResGraph");
+//     resDiv.appendChild(node);
+//   } else{
+//     node.remove();
+//     if(event.detail["gene"] != ""){
+//       node = document.createElement("linear-card");
+//       let resDiv = document.querySelector("#ResGraph");
+//       resDiv.appendChild(node);
+//     }
+//   }
+//   if(event.detail["gene"] != ""){
+//     node.setAttribute("width_bar", '90%');
+//     node.setAttribute("all_sgrna", event.detail["allSgrna"]);
+//     node.setAttribute("gene", event.detail["gene"]);
+//   }
+//
+// })
