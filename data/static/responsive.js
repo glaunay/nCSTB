@@ -1,5 +1,4 @@
-// last modif at 16 dec 2016 01:18
-// last modif at 17 Jul 2019 01:18
+// last modif at 17 Jul 2019 10:59
 socket.on("resultsAllGenomes", function(data) {
     console.log("Showing All Genomes results");
     console.dir(data);
@@ -218,6 +217,38 @@ function treatResults(results, isSg){
 	}
 }
 
+// change active link for tab-nav and change results to show
+function clickNav(d) {
+  // check if clicked nav is not the active one
+  if(d.className != "nav-link active"){
+    let allNav = document.querySelectorAll(".nav-link");
+    // all nav-tab set to not active
+    allNav.forEach(e => e.className="nav-link");
+    // active the one clicked
+    d.className="nav-link active";
+    // show/hide results
+    if (d.id == "graphicResult") {
+      document.querySelector("result-page").style.display="block";
+      document.querySelector("#ResTable").style.display="none";
+    } else if (d.id == "tableResult") {
+      document.querySelector("result-page").style.display="none";
+      document.querySelector("#ResTable").style.display="block";
+    }
+  }
+}
+
+function clickDrop(d) {
+  if(d.id.split(' ')[1] == "off") {
+    d.id = "drop_not_in on";
+    document.querySelector("#infos>p:nth-child(2)").style.display="block";
+    d.innerHTML="arrow_drop_up";
+
+  } else {
+    d.id = "drop_not_in off";
+    document.querySelector("#infos>p:nth-child(2)").style.display="none";
+    d.innerHTML="arrow_drop_down";
+  }
+}
 
 // *********************************************
 //            *  TREAT FASTA FILE *
@@ -393,15 +424,7 @@ function submitSpecificGene(selectedTaxon){
 	$('#list_selection_sg').hide();
 	$('#other_parameters_sg').hide();
 	$('#Waiting').show();
-	/*
-	var N=JSON.stringify(n_gene);
-	var PID=JSON.stringify(percent_id);
-	var SEQ=JSON.stringify(final_sequence);
-	var GIN=JSON.stringify(includeNameListSG);
-	var GNOTIN=JSON.stringify(excludeNameListSG);
-	var PAM=JSON.stringify(pam);
-	var LENGTH=JSON.stringify(sgrna_length);
-	*/
+
 	socket.emit("submitSpecific", { "seq"   : final_sequence,
 									"gi"   : selectedTaxon["includeNameList"],
 									"gni": selectedTaxon["excludeNameList"],
@@ -482,9 +505,6 @@ function setupAllGenome(){
 	$('#search_notin').val('')
 	$('#spec_tips').hide()
 	$('#other_parameters').hide()
-	//excludeIdList=[]
-	//includeIdList=[]
-
 }
 
 function setupSpecificGene(){
@@ -512,6 +532,9 @@ function setupSpecificGene(){
 }
 
 
+// *********************************************
+//                 *  MAIN *
+// *********************************************
 $(document).ready(function(){
   let selectedTaxonAG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
   let selectedTaxonSG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
@@ -618,37 +641,4 @@ $(document).ready(function(){
 
 function reloadpage() {
     location.reload();
-}
-
-// change active link for tab-nav and change results to show
-function clickNav(d) {
-  // check if clicked nav is not the active one
-  if(d.className != "nav-link active"){
-    let allNav = document.querySelectorAll(".nav-link");
-    // all nav-tab set to not active
-    allNav.forEach(e => e.className="nav-link");
-    // active the one clicked
-    d.className="nav-link active";
-    // show/hide results
-    if (d.id == "graphicResult") {
-      document.querySelector("result-page").style.display="block";
-      document.querySelector("#ResTable").style.display="none";
-    } else if (d.id == "tableResult") {
-      document.querySelector("result-page").style.display="none";
-      document.querySelector("#ResTable").style.display="block";
-    }
-  }
-}
-
-function clickDrop(d) {
-  if(d.id.split(' ')[1] == "off") {
-    d.id = "drop_not_in on";
-    document.querySelector("#infos>p:nth-child(2)").style.display="block";
-    d.innerHTML="arrow_drop_up";
-
-  } else {
-    d.id = "drop_not_in off";
-    document.querySelector("#infos>p:nth-child(2)").style.display="none";
-    d.innerHTML="arrow_drop_down";
-  }
 }
