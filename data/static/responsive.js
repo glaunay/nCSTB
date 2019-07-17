@@ -1,20 +1,20 @@
 // last modif at 17 Jul 2019 10:59
 socket.on("resultsAllGenomes", function(data) {
-    console.log("Showing All Genomes results");
-    console.dir(data);
-    treatResults(data, false);
+  console.log("Showing All Genomes results");
+  console.dir(data);
+  treatResults(data, false);
 });
 
 socket.on("submitted", function(data) {
-    console.log("Submitted");
-    console.dir(data);
+  console.log("Submitted");
+  console.dir(data);
 });
 
 
 socket.on("resultsSpecific", function(data) {
-    console.log("Showing Specific results");
-    console.dir(data);
-    treatResults(data, true);
+  console.log("Showing Specific results");
+  console.dir(data);
+  treatResults(data, true);
 });
 
 // *********************************************
@@ -22,9 +22,9 @@ socket.on("resultsSpecific", function(data) {
 // *********************************************
 function displayTree(suffix, searchType, treeType){
 	var to = false;
-	$(searchType+suffix).keyup(function () {
-		if(to) { clearTimeout(to); }
-		to = setTimeout(function () {
+	$(searchType+suffix).keyup(function (){
+		if(to){ clearTimeout(to); }
+		to = setTimeout(function (){
 			var v = $(searchType+suffix).val();
 			$(treeType+suffix).jstree().search(v);
 		}, 250);
@@ -47,7 +47,6 @@ function displayTree(suffix, searchType, treeType){
 	});
 	$(treeType+suffix).jstree().show_dots();
 }
-
 
 function selectOntree(treeName, reverseTree, j1, j2){
   // Enable all nodes in reverse Tree
@@ -99,13 +98,13 @@ function submitTree(treeName, isSG){
 // *********************************************
 //            *  TREAT RESULTS *
 // *********************************************
-function display_download(tag) {
-    onDownload(tag)
-    return;
+function display_download(tag){
+  onDownload(tag)
+  return;
 }
 
-function onDownload(data) {
-    $('#result-file').html('<a href="download/' + data +'" >Download results</a>')
+function onDownload(data){
+  $('#result-file').html('<a href="download/' + data +'" >Download results</a>')
 }
 
 function writeResults(obj){
@@ -138,13 +137,12 @@ function writeResults(obj){
 		}
 		print_seq='<td rowspan="'+line_seq+'" valign="top">' + seq + '</td>'
 		out=print_seq+out
-
 	}
 	var header='<tr class = "w3-light-grey"> <th> sgRNA sequence </th> <th> Organism(s) </th> <th colspan=2> Coordinates </th> </tr>'
 	out=header+out
 	return out
-
 }
+
 function treatResults(results, isSg){
 	$("#Waiting").hide();
     var data = results.data;
@@ -202,7 +200,7 @@ function treatResults(results, isSg){
 }
 
 // change active link for tab-nav and change results to show
-function clickNav(d) {
+function clickNav(d){
   // check if clicked nav is not the active one
   if(d.className != "nav-link active"){
     let allNav = document.querySelectorAll(".nav-link");
@@ -211,18 +209,19 @@ function clickNav(d) {
     // active the one clicked
     d.className="nav-link active";
     // show/hide results
-    if (d.id == "graphicResult") {
+    if (d.id == "graphicResult"){
       document.querySelector("result-page").style.display="block";
       document.querySelector("#ResTable").style.display="none";
-    } else if (d.id == "tableResult") {
+    } else if (d.id == "tableResult"){
       document.querySelector("result-page").style.display="none";
       document.querySelector("#ResTable").style.display="block";
     }
   }
 }
 
-function clickDrop(d) {
-  if(d.id.split(' ')[1] == "off") {
+// display or not organisms excluded
+function clickDrop(d){
+  if(d.id.split(' ')[1] == "off"){
     d.id = "drop_not_in on";
     document.querySelector("#infos>p:nth-child(2)").style.display="block";
     d.innerHTML="arrow_drop_up";
@@ -267,26 +266,26 @@ function verifyFasta(seq){
 }
 
 function loadFile(id){
-			if ( ! window.FileReader ) {
-				return alert( 'FileReader API is not supported by your browser.' );
-			}
-			var $i = $(id), // Put file input ID here
-				input = $i[0];
-			if ( input.files && input.files[0] ) {
-				file = input.files[0]; // The file
-				fr = new FileReader(); // FileReader instance
+	if ( ! window.FileReader ){
+		return alert( 'FileReader API is not supported by your browser.' );
+	}
+	var $i = $(id), // Put file input ID here
+		input = $i[0];
+	if ( input.files && input.files[0] ){
+		file = input.files[0]; // The file
+		fr = new FileReader(); // FileReader instance
 
-				fr.readAsText( file );
-				fr.onload = function () {
-					// Do stuff on onload, use fr.result for contents of file
-					sequence=fr.result
-					$('#seq').val(sequence)
-				};
-			}
-			else {
-				// Handle errors here
-				alert( "File not selected or browser incompatible." )
-			}
+		fr.readAsText( file );
+		fr.onload = function (){
+			// Do stuff on onload, use fr.result for contents of file
+			sequence=fr.result
+			$('#seq').val(sequence)
+		};
+	}
+	else {
+		// Handle errors here
+		alert( "File not selected or browser incompatible." )
+	}
 }
 
 function treatFastaFile(){
@@ -377,22 +376,24 @@ function clearListView(suffix){
 // *********************************************
 //            *  SUBMIT PARAMETERS *
 // *********************************************
-function submitSetupAllGenome(selectedTaxon){
+function submitSetupAllGenome(){
 	$('#Tabselection').hide()
 	$('#allg_tips').hide()
 	$('#list_selection').hide()
 	$('#other_parameters').hide()
 
 	$('#Waiting').show()
-	// GIN=JSON.stringify(selectedTaxon["includeNameList"]);
-  GIN = JSON.stringify($("#tree_include").jstree('get_bottom_selected', true).map(node => node.text));
-	GNOTIN=JSON.stringify($("#tree_exclude").jstree('get_bottom_selected', true).map(node => node.text));
-	PAM=$("select[name='pam_AllG'] > option:selected").val();
-	SGRNA=$("select[name='sgrna-length_AllG'] > option:selected").val();
+
+  socket.emit('submitAllGenomes', {
+      "gi":JSON.stringify($("#tree_include").jstree('get_bottom_selected', true).map(node => node.text)),
+      "gni":JSON.stringify($("#tree_exclude").jstree('get_bottom_selected', true).map(node => node.text)),
+      "pam":$("select[name='pam_AllG'] > option:selected").val(),
+      "sgrna_length":$("select[name='sgrna-length_AllG'] > option:selected").val()
+    });
 
 }
 
-function submitSpecificGene(selectedTaxon){
+function submitSpecificGene(n_gene, percent_id, pam, sgrna_length){
 	$("#Tabselection").hide();
 
 	$('#spec_tips').hide();
@@ -413,15 +414,7 @@ function submitSpecificGene(selectedTaxon){
 
 }
 
-function paramSpecificGene(){
-	n_gene=$("#search-region").val()
-	percent_id=$("#percent-identity").val()
-	pam=$("select[name='pam'] > option:selected").val();
-	sgrna_length=$("select[name='sgrna-length'] > option:selected").val();
-
-}
-
-function error_gestion(){
+function error_gestion(n_gene, percent_id, pam, sgrna_length){
 	var errors=false
 	try{
 		if (n_gene=='')throw "format error";
@@ -489,7 +482,7 @@ function setupAllGenome(){
 }
 
 function setupSpecificGene(){
-	$("#search-region").val('100')
+	$("#search-region").val('0')
 	$("#percent-identity").val('70')
 	$("select[name='pam'] > option:selected").val('NGG');
 	$("select[name='sgrna-length'] > option:selected").val('20');
@@ -517,8 +510,6 @@ function setupSpecificGene(){
 //                 *  MAIN *
 // *********************************************
 $(document).ready(function(){
-  let selectedTaxonAG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
-  let selectedTaxonSG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
 	setupAll()
 
 	$('#AG_click').click(function(){
@@ -568,8 +559,7 @@ $(document).ready(function(){
 	})
 
 	$('#submitbtn').click(function(){
-		submitSetupAllGenome(selectedTaxonAG)
-    socket.emit('submitAllGenomes', {gi:GIN,gni:GNOTIN,pam:PAM,sgrna_length:SGRNA});
+		submitSetupAllGenome()
 	})
 
 
@@ -577,7 +567,6 @@ $(document).ready(function(){
 		setupAll()
 		setupSpecificGene()
 	})
-
 
 	$('#SG_click2').click(function(){
 		setupAll()
@@ -588,9 +577,7 @@ $(document).ready(function(){
 
 	$('#next').click(function(){
 		displaySequence()
-
 	})
-
 
 	$('#reset_trees_sg').click(function(){
 		resetTree('_sg')
@@ -608,17 +595,20 @@ $(document).ready(function(){
 
 
 	$('#submitbtn_sg').click(function(){
-		paramSpecificGene()
-		if (error_gestion()==true){
+    let n_gene=$("#search-region").val()
+  	let percent_id=$("#percent-identity").val()
+  	let pam=$("select[name='pam'] > option:selected").val();
+  	let sgrna_length=$("select[name='sgrna-length'] > option:selected").val();
+		if (error_gestion(n_gene, percent_id, pam, sgrna_length)==true){
 			window.alert('Error(s) in parameters')
 		}
 		else{
-			submitSpecificGene(selectedTaxonSG)
+			submitSpecificGene(n_gene, percent_id, pam, sgrna_length)
 		}
 
 	})
 })
 
-function reloadpage() {
+function reloadpage(){
     location.reload();
 }
