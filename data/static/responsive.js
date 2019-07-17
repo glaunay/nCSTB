@@ -50,131 +50,31 @@ function displayTree(suffix, searchType, treeType){
 }
 
 
-function selectOntree(data, treeName, reverseTree, idList, disabledNode, excludeReverse, j1, j2){
-	for(m = 0, n = idList.length; m < n; m++) {
-		disabledNode.push(idList[m].replace(j1,j2));
+function selectOntree(data, treeName, reverseTree, selectedTaxon, argTab, j1, j2){
+  console.dir(selectedTaxon[argTab[0]]);
+	for(m = 0, n = selectedTaxon[argTab[0]].length; m < n; m++) {
+		selectedTaxon[argTab[1]].push(selectedTaxon[argTab[0]][m].replace(j1,j2));
 	}
-	$(reverseTree).jstree().enable_node(disabledNode);
+	$(reverseTree).jstree().enable_node(selectedTaxon[argTab[1]]);
 
-	idList = data.selected
-	disabledNode = []
-	for(m = 0, n = idList.length; m < n; m++) {
-		disabledNode.push(idList[m].replace(j1,j2));
+	selectedTaxon[argTab[0]] = data.selected
+	selectedTaxon[argTab[1]] = []
+	for(m = 0, n = selectedTaxon[argTab[0]].length; m < n; m++) {
+		selectedTaxon[argTab[1]].push(selectedTaxon[argTab[0]][m].replace(j1,j2));
 		}
-	$(reverseTree).jstree().disable_node(disabledNode);
+	$(reverseTree).jstree().disable_node(selectedTaxon[argTab[1]]);
 
-	selectNode = [];
-	for(i = 0, j = idList.length; i < j; i++) {
-		selectNode.push(data.instance.get_node(idList[i]).text);
+	selectedTaxon[argTab[3]] = [];
+	for(i = 0, j = selectedTaxon[argTab[0]].length; i < j; i++) {
+		selectedTaxon[argTab[3]].push(data.instance.get_node(selectedTaxon[argTab[0]][i]).text);
 	};
 
 	noSelected=[]
-	for(i=0;i<excludeReverse.length;i++){
-		noSelected.push(excludeReverse[i].replace(j2,j1))
+	for(i=0;i<selectedTaxon[argTab[2]].length;i++){
+		noSelected.push(selectedTaxon[argTab[2]][i].replace(j2,j1))
 	}
 	$(treeName).jstree(true).uncheck_node(noSelected);
-  console.dir(idList)
-}
-
-
-
-function selectOnTreeInAG(data){
-	for(m = 0, n = includeIdListAG.length; m < n; m++) {
-		disabledExcAG.push(includeIdListAG[m].replace('j1','j2'));
-	}
-	$("#tree_exclude").jstree().enable_node(disabledExcAG);
-
-	includeIdListAG = data.selected
-	disabledExcAG = []
-	for(m = 0, n = includeIdListAG.length; m < n; m++) {
-		disabledExcAG.push(includeIdListAG[m].replace('j1','j2'));
-		}
-	$("#tree_exclude").jstree().disable_node(disabledExcAG);
-
-	includeNameListAG = [];
-	for(i = 0, j = includeIdListAG.length; i < j; i++) {
-		includeNameListAG.push(data.instance.get_node(includeIdListAG[i]).text);
-	};
-
-	notSelectedIdInAG=[]
-	for(i=0;i<excludeIdListAG.length;i++){
-		notSelectedIdInAG.push(excludeIdListAG[i].replace('j2','j1'))
-	}
-	$('#tree_include').jstree(true).uncheck_node(notSelectedIdInAG);
-}
-
-function selectOnTreeInSG(data){
-	for(m = 0, n = includeIdListSG.length; m < n; m++) {
-		disabledExcSG.push(includeIdListSG[m].replace('j3','j4'));
-	}
-	$("#tree_exclude_sg").jstree().enable_node(disabledExcSG);
-
-	includeIdListSG = data.selected
-	disabledExcSG = []
-	for(m = 0, n = includeIdListSG.length; m < n; m++) {
-		disabledExcSG.push(includeIdListSG[m].replace('j3','j4'));
-		}
-	$("#tree_exclude_sg").jstree().disable_node(disabledExcSG);
-
-	includeNameListSG = [];
-	for(i = 0, j = includeIdListSG.length; i < j; i++) {
-		includeNameListSG.push(data.instance.get_node(includeIdListSG[i]).text);
-	};
-
-	notSelectedIdInSG=[]
-	for(i=0;i<excludeIdListSG.length;i++){
-		notSelectedIdInSG.push(excludeIdListSG[i].replace('j4','j2'))
-	}
-	$('#tree_include_sg').jstree(true).uncheck_node(notSelectedIdInSG);
-}
-
-
-function selectOnTreeNotInAG(data){
-	for(m = 0, n = excludeIdListAG.length; m < n; m++) {
-		disabledIncAG.push(excludeIdListAG[m].replace('j2','j1'));
-	}
-	$("#tree_include").jstree().enable_node(disabledIncAG);
-	excludeIdListAG = data.selected
-	disabledIncAG = []
-	for(m = 0, n = excludeIdListAG.length; m < n; m++) {
-		disabledIncAG.push(excludeIdListAG[m].replace('j2','j1'));
-	}
-	$("#tree_include").jstree().disable_node(disabledIncAG);
-	excludeNameListAG = [];
-	for(i = 0, j = excludeIdListAG.length; i < j; i++) {
-		excludeNameListAG.push(data.instance.get_node(excludeIdListAG[i]).text);
-	};
-
-	notSelectedIdNotInAG=[]
-	for(i=0;i<includeIdListAG.length;i++){
-		notSelectedIdNotInAG.push(includeIdListAG[i].replace('j1','j2'))
-	}
-	$('#tree_exclude').jstree(true).uncheck_node(notSelectedIdNotInAG);
-
-}
-
-function selectOnTreeNotInSG(data){
-	for(m = 0, n = excludeIdListSG.length; m < n; m++) {
-		disabledIncSG.push(excludeIdListSG[m].replace('j4','j3'));
-	}
-	$("#tree_include_sg").jstree().enable_node(disabledIncSG);
-	excludeIdListSG = data.selected
-	disabledIncSG = []
-	for(m = 0, n = excludeIdListSG.length; m < n; m++) {
-		disabledIncSG.push(excludeIdListSG[m].replace('j4','j3'));
-	}
-	$("#tree_include_sg").jstree().disable_node(disabledIncSG);
-	excludeNameListSG = [];
-	for(i = 0, j = excludeIdListSG.length; i < j; i++) {
-		excludeNameListSG.push(data.instance.get_node(excludeIdListSG[i]).text);
-	};
-
-	notSelectedIdNotInSG=[]
-	for(i=0;i<includeIdListSG.length;i++){
-		notSelectedIdNotInSG.push(includeIdListSG[i].replace('j3','j4'))
-	}
-	$('#tree_exclude_sg').jstree(true).uncheck_node(notSelectedIdNotInSG);
-
+  // console.dir(idList)
 }
 
 function resetTree(suffix){
@@ -194,8 +94,8 @@ function resetTree(suffix){
 	//includeNameList=[]
 }
 
-function submitTree(includeIdListAG){
-	if(includeIdListAG.length==0){
+function submitTree(selectedTaxon){
+	if(selectedTaxon["includeIdList"].length==0){
 		window.alert('You have to choose at least one included genome')
 		return
 	}
@@ -207,13 +107,13 @@ function submitTree(includeIdListAG){
 	$('#confirm_n').show()
 	$('#ShowIN').show()
 	$('#ShowNOTIN').show()
-	displaySelectionAG(includeIdListAG)
+	displaySelection(selectedTaxon, "#InView", "#NotInView", '#tree_include', '#tree_exclude')
 }
 
-function submitTreeSG(){
+function submitTreeSG(selectedTaxon){
 	//$('#ShowSeq').hide()
 	//$('#tree').hide()
-	if(includeIdListSG.length==0){
+	if(selectedTaxon["includeIdList"].length==0){
 		window.alert('You have to choose at least one included genome')
 		return
 	}
@@ -226,7 +126,7 @@ function submitTreeSG(){
 	$('#list_selection_sg').show()
 	$('#confirm_y_sg').show()
 	$('#confirm_n_sg').show()
-	displaySelectionSG()
+	displaySelection(selectedTaxon, "#InView_sg", "#NotInView_sg", '#tree_include_sg', '#tree_exclude_sg')
 }
 
 
@@ -438,42 +338,22 @@ function displaySequence(){
 // *********************************************
 //        *  DISPLAY & TREAT SELECTIONS  *
 // *********************************************
-function displaySelectionAG(includeIdListAG){
-	for (i=0;i<includeNameListAG.length;i++){
-		node=includeIdListAG[i]
-		if ($('#tree_include').jstree().is_leaf(node)){
-			n=new Option(includeNameListAG[i]);
-			$(n).html(includeNameListAG[i]);
-			$("#InView").append(n);	//Adds the contents of 'includeNameList' array into the 'InView'
+function displaySelection(selectedTaxon, divView, divNotView, treeIn, treeEx){
+	for (i=0;i<selectedTaxon["includeNameList"].length;i++){
+		node=selectedTaxon["includeIdList"][i]
+		if ($(treeIn).jstree().is_leaf(node)){
+			n=new Option(selectedTaxon["includeNameList"][i]);
+			$(n).html(selectedTaxon["includeNameList"][i]);
+			$(divView).append(n);	//Adds the contents of 'includeNameList' array into the 'InView'
 		}
 
 	};
-	for (i=0;i<excludeNameListAG.length;i++){
-		node=excludeIdListAG[i]
-		if ($('#tree_exclude').jstree().is_leaf(node)){
-			n=new Option(excludeNameListAG[i]);
-			$(n).html(excludeNameListAG[i]);
-			$("#NotInView").append(n);	//Adds the contents of 'includeNameList' array into the 'InView'
-		}
-	};
-}
-
-function displaySelectionSG(){
-	for (i=0;i<includeNameListSG.length;i++){
-		node=includeIdListSG[i]
-		if ($('#tree_include_sg').jstree().is_leaf(node)){
-			n=new Option(includeNameListSG[i]);
-			$(n).html(includeNameListSG[i]);
-			$("#InView_sg").append(n);	//Adds the contents of 'includeNameList' array into the 'InView'
-		}
-
-	};
-	for (i=0;i<excludeNameListSG.length;i++){
-		node=excludeIdListSG[i]
-		if ($('#tree_exclude_sg').jstree().is_leaf(node)){
-			n=new Option(excludeNameListSG[i]);
-			$(n).html(excludeNameListSG[i]);
-			$("#NotInView_sg").append(n);	//Adds the contents of 'includeNameList' array into the 'InView'
+	for (i=0;i<selectedTaxon["excludeNameList"].length;i++){
+		node=selectedTaxon["excludeIdList"][i]
+		if ($(treeEx).jstree().is_leaf(node)){
+			n=new Option(selectedTaxon["excludeNameList"][i]);
+			$(n).html(selectedTaxon["excludeNameList"][i]);
+			$(divNotView).append(n);	//Adds the contents of 'includeNameList' array into the 'InView'
 		}
 	};
 }
@@ -509,21 +389,21 @@ function clearListView(suffix){
 // *********************************************
 //            *  SUBMIT PARAMETERS *
 // *********************************************
-function submitSetupAllGenome(){
+function submitSetupAllGenome(selectedTaxon){
 	$('#Tabselection').hide()
 	$('#allg_tips').hide()
 	$('#list_selection').hide()
 	$('#other_parameters').hide()
 
 	$('#Waiting').show()
-	GIN=JSON.stringify(includeNameListAG);
-	GNOTIN=JSON.stringify(excludeNameListAG);
+	GIN=JSON.stringify(selectedTaxon["includeNameList"]);
+	GNOTIN=JSON.stringify(selectedTaxon["excludeNameList"]);
 	PAM=$("select[name='pam_AllG'] > option:selected").val();
 	SGRNA=$("select[name='sgrna-length_AllG'] > option:selected").val();
 
 }
 
-function submitSpecificGene(){
+function submitSpecificGene(selectedTaxon){
 	$("#Tabselection").hide();
 
 	$('#spec_tips').hide();
@@ -542,8 +422,8 @@ function submitSpecificGene(){
 	var LENGTH=JSON.stringify(sgrna_length);
 	*/
 	socket.emit("submitSpecific", { "seq"   : final_sequence,
-									"gi"   : includeNameListSG,
-									"gni": excludeNameListSG,
+									"gi"   : selectedTaxon["includeNameList"],
+									"gni": selectedTaxon["excludeNameList"],
 									"n"     : n_gene,
 									"pid"   : percent_id,
 									"pam"   : pam,
@@ -652,14 +532,8 @@ function setupSpecificGene(){
 
 
 function setupVariable(){
-	includeIdListAG=[]
-	excludeIdListAG=[]
-	disabledIncAG=[]
-	disabledExcAG=[]
-	includeIdListSG=[]
-	excludeIdListSG=[]
-	disabledIncSG=[]
-	disabledExcSG=[]
+   selectedTaxonAG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
+   selectedTaxonSG2 = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
 }
 
 
@@ -680,42 +554,31 @@ $(document).ready(function(){
 		resetTree('')
 	})
 //  TREE
-	// $('#tree_include').on("changed.jstree",function(e,data){
-	// 	selectOntree(data, '#tree_include', '#tree_exclude', includeIdListAG, disabledExcAG, excludeIdListAG, 'j1', 'j2')
-  //   console.dir(includeIdListAG)
-	// })
-  //
-	// $('#tree_exclude').on("changed.jstree", function (e, data) {	// replace changed for onclicked like below
-	// 	selectOntree(data, '#tree_exclude', '#tree_include', excludeIdListAG, disabledIncAG, includeIdListAG, 'j2', 'j1')
-	// })
-  //
-  // $('#tree_include_sg').on("changed.jstree",function(e,data){
-	// 	selectOntree(data, '#tree_include_sg', '#tree_exclude_sg', includeIdListSG, disabledExcSG, excludeIdListSG, 'j3', 'j4')
-	// })
-  //
-	// $('#tree_exclude_sg').on("changed.jstree",function(e,data){
-	// 	selectOntree(data, '#tree_exclude_sg', '#tree_include_sg', excludeIdListSG, disabledIncSG, includeIdListSG, 'j4', 'j3')
-	// })
-//   console.dir(includeIdListAG)
-  $('#tree_include').on("changed.jstree",function(e,data){
-  selectOnTreeInAG(data)
-})
+	$('#tree_include').on("changed.jstree",function(e,data){
+    selectOntree(data, "#tree_include", "#tree_exclude", selectedTaxonAG, ["includeIdList", "disabledExc", "excludeIdList", "includeNameList"] , "j1", "j2")
+    console.dir(selectedTaxonAG["includeIdList"])
+	})
 
-$('#tree_exclude').on("changed.jstree", function (e, data) {	// replace changed for onclicked like below
-  selectOnTreeNotInAG(data)
-})
-$('#tree_include_sg').on("changed.jstree",function(e,data){
-  selectOnTreeInSG(data)
-})
-$('#tree_exclude_sg').on("changed.jstree",function(e,data){
-  selectOnTreeNotInSG(data)
-})
+	$('#tree_exclude').on("changed.jstree", function (e, data) {	// replace changed for onclicked like below
+    selectOntree(data, "#tree_exclude", "#tree_include", selectedTaxonAG, ["excludeIdList", "disabledInc", "includeIdList", "excludeNameList"] , "j2", "j1")
+	})
+
+  $('#tree_include_sg').on("changed.jstree",function(e,data){
+  	selectOntree(data, '#tree_include_sg', '#tree_exclude_sg', selectedTaxonSG2, ["includeIdList", "disabledExc", "excludeIdList", "includeNameList"], 'j3', 'j4')
+
+	})
+
+	$('#tree_exclude_sg').on("changed.jstree",function(e,data){
+  	selectOntree(data, '#tree_exclude_sg', '#tree_include_sg', selectedTaxonSG2, ["excludeIdList", "disabledInc", "includeIdList", "excludeNameList"], 'j4', 'j3')
+
+	})
+
 	$('#reset_trees').click(function(){
 		resetTree('')
 	})
 
 	$('#submit_trees').click(function(){
-		submitTree(includeIdListAG)
+		submitTree(selectedTaxonAG)
 	})
 
 
@@ -728,16 +591,9 @@ $('#tree_exclude_sg').on("changed.jstree",function(e,data){
 	})
 
 	$('#submitbtn').click(function(){
-		submitSetupAllGenome()
-
-        socket.emit('submitAllGenomes', {gi:GIN,gni:GNOTIN,pam:PAM,sgrna_length:SGRNA});
-        /*$.getJSON($SCRIPT_ROOT+'/allgenomes',{gi:GIN,gni:GNOTIN,pam:PAM,sgrna_length:SGRNA},
-		function(data) {
-			treatResults(data)
-		})*/
-
+		submitSetupAllGenome(selectedTaxonAG)
+    socket.emit('submitAllGenomes', {gi:GIN,gni:GNOTIN,pam:PAM,sgrna_length:SGRNA});
 	})
-
 
 
 	$('#SG_click').click(function(){
@@ -759,13 +615,11 @@ $('#tree_exclude_sg').on("changed.jstree",function(e,data){
 	})
 
 
-
-
 	$('#reset_trees_sg').click(function(){
 		resetTree('_sg')
 	})
 
-	$('#submit_trees_sg').click(submitTreeSG)
+	$('#submit_trees_sg').click(() => submitTreeSG(selectedTaxonSG))
 
 	$('#confirm_y_sg').click(function(){
 		confirmSelection('_sg')
@@ -782,7 +636,7 @@ $('#tree_exclude_sg').on("changed.jstree",function(e,data){
 			window.alert('Error(s) in parameters')
 		}
 		else{
-			submitSpecificGene()
+			submitSpecificGene(selectedTaxonSG)
 		}
 
 	})
@@ -828,26 +682,3 @@ function clickDrop(d) {
     d.innerHTML="arrow_drop_down";
   }
 }
-
-// window.addEventListener("sgDataSection", event => {
-//   console.dir("Houla")
-//   let node = document.querySelector("linear-card");
-//   if(node == null){
-//     node = document.createElement("linear-card");
-//     let resDiv = document.querySelector("#ResGraph");
-//     resDiv.appendChild(node);
-//   } else{
-//     node.remove();
-//     if(event.detail["gene"] != ""){
-//       node = document.createElement("linear-card");
-//       let resDiv = document.querySelector("#ResGraph");
-//       resDiv.appendChild(node);
-//     }
-//   }
-//   if(event.detail["gene"] != ""){
-//     node.setAttribute("width_bar", '90%');
-//     node.setAttribute("all_sgrna", event.detail["allSgrna"]);
-//     node.setAttribute("gene", event.detail["gene"]);
-//   }
-//
-// })
