@@ -1,11 +1,11 @@
 // last modif at 16 dec 2016 01:18
+// last modif at 17 Jul 2019 01:18
 socket.on("resultsAllGenomes", function(data) {
     console.log("Showing All Genomes results");
     console.dir(data);
     treatResults(data, false);
 });
 
-//var socket = io();
 socket.on("submitted", function(data) {
     console.log("Submitted");
     console.dir(data);
@@ -74,7 +74,6 @@ function selectOntree(data, treeName, reverseTree, selectedTaxon, argTab, j1, j2
 		noSelected.push(selectedTaxon[argTab[2]][i].replace(j2,j1))
 	}
 	$(treeName).jstree(true).uncheck_node(noSelected);
-  // console.dir(idList)
 }
 
 function resetTree(suffix){
@@ -86,47 +85,29 @@ function resetTree(suffix){
 	$('#tree_exclude'+suffix).jstree().search('');
 	$('#search_in'+suffix).val('')
 	$('#search_notin'+suffix).val('')
-	//includeIdList=[]
-	//disabledExc=[]
-	//excludeIdList=[]
-	//disabledInc=[]
-	//excludeNameList=[]
-	//includeNameList=[]
 }
 
-function submitTree(selectedTaxon){
+function submitTree(selectedTaxon, isSG){
 	if(selectedTaxon["includeIdList"].length==0){
 		window.alert('You have to choose at least one included genome')
 		return
 	}
-	$('#tree_ag').hide()
-	$("#submit_trees").hide();
-	$("#reset_trees").hide();
-	$('#list_selection').show();
-	$('#confirm_y').show()
-	$('#confirm_n').show()
-	$('#ShowIN').show()
-	$('#ShowNOTIN').show()
-	displaySelection(selectedTaxon, "#InView", "#NotInView", '#tree_include', '#tree_exclude')
-}
+  suffix = (isSG) ? "_sg" : "";
 
-function submitTreeSG(selectedTaxon){
-	//$('#ShowSeq').hide()
-	//$('#tree').hide()
-	if(selectedTaxon["includeIdList"].length==0){
-		window.alert('You have to choose at least one included genome')
-		return
-	}
-	$('#ShowSeq').hide()
-	$('#submit_trees_sg').hide()
-	$('#reset_trees_sg').hide()
-	$('#tree').hide()
-	$('#ShowIN_sg').show()
-	$('#ShowNOTIN_sg').show()
-	$('#list_selection_sg').show()
-	$('#confirm_y_sg').show()
-	$('#confirm_n_sg').show()
-	displaySelection(selectedTaxon, "#InView_sg", "#NotInView_sg", '#tree_include_sg', '#tree_exclude_sg')
+	$('#tree'+ suffix).hide()
+	$("#submit_trees" + suffix).hide();
+	$("#reset_trees" + suffix).hide();
+	$('#list_selection' + suffix).show();
+	$('#confirm_y' + suffix).show()
+	$('#confirm_n' + suffix).show()
+	$('#ShowIN' + suffix).show()
+	$('#ShowNOTIN' + suffix).show()
+  if(isSG){
+    $('#ShowSeq').hide()
+    displaySelection(selectedTaxon, "#InView_sg", "#NotInView_sg", '#tree_include_sg', '#tree_exclude_sg')
+  }else{
+    displaySelection(selectedTaxon, "#InView", "#NotInView", '#tree_include', '#tree_exclude')
+  }
 }
 
 
@@ -328,7 +309,7 @@ function displaySequence(){
 	$('#next').hide()
 	$('#list').hide()
 	$('#changeSeq').show()
-	$('#tree').show()
+	$('#tree_sg').show()
 	$('#reset_trees_sg').show()
 	$('#submit_trees_sg').show()
 	resetTree('_sg')
@@ -369,7 +350,7 @@ function resetSelection(suffix){
 	$('#list_selection'+suffix).hide()
 	$("#ShowIN"+suffix).hide();
 	$("#ShowNOTIN"+suffix).hide();
-	$('#tree_ag').show();
+	$('#tree').show();
 	$("#submit_trees"+suffix).show();
 	$("#reset_trees"+suffix).show();
 	clearListView(suffix)
@@ -408,7 +389,7 @@ function submitSpecificGene(selectedTaxon){
 
 	$('#spec_tips').hide();
 	$('#ShowSeq').hide();
-	$('#tree').hide()
+	$('#tree_sg').hide()
 	$('#list_selection_sg').hide();
 	$('#other_parameters_sg').hide();
 	$('#Waiting').show();
@@ -469,7 +450,7 @@ function error_gestion(){
 function setupAll(){
 	$('#AG_click').show()
 	$('#allg_tips').hide()
-	$('#tree_ag').hide()
+	$('#tree').hide()
 	$('#list_selection').hide()
 	$('#AG_click2').hide()
 	$('#SG_click2').hide()
@@ -477,7 +458,7 @@ function setupAll(){
 	$('#spec_tips').hide()
 	$('#list_selection_sg').hide()
 	$('#Sequenceupload').hide()
-	$('#tree').hide()
+	$('#tree_sg').hide()
 	$('#next').hide()
 	$('#other_parameters_sg').hide()
 	$('#ShowSeq').hide()
@@ -490,7 +471,7 @@ function setupAll(){
 function setupAllGenome(){
 	$('#footer').show()
 	$('#allg_tips').show()
-	$('#tree_ag').show()
+	$('#tree').show()
 	$('#submit_trees').show()
 	$('#reset_trees').show()
 	$('#SG_click').hide()
@@ -514,7 +495,7 @@ function setupSpecificGene(){
 
 	$('#footer').show()
 	$('#allg_tips').hide()
-	$('#tree_ag').hide()
+	$('#tree').hide()
 	$('#AG_click').hide()
 	$('#AG_click2').show()
 	$('#SG_click2').hide()
@@ -531,15 +512,9 @@ function setupSpecificGene(){
 }
 
 
-function setupVariable(){
-   selectedTaxonAG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
-   selectedTaxonSG2 = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
-}
-
-
 $(document).ready(function(){
-
-	setupVariable()
+  let selectedTaxonAG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
+  let selectedTaxonSG = {includeIdList:[], excludeIdList:[], disabledInc:[], disabledExc:[], includeNameList:[], excludeNameList:[]};
 	setupAll()
 
 	$('#AG_click').click(function(){
@@ -564,12 +539,12 @@ $(document).ready(function(){
 	})
 
   $('#tree_include_sg').on("changed.jstree",function(e,data){
-  	selectOntree(data, '#tree_include_sg', '#tree_exclude_sg', selectedTaxonSG2, ["includeIdList", "disabledExc", "excludeIdList", "includeNameList"], 'j3', 'j4')
+  	selectOntree(data, '#tree_include_sg', '#tree_exclude_sg', selectedTaxonSG, ["includeIdList", "disabledExc", "excludeIdList", "includeNameList"], 'j3', 'j4')
 
 	})
 
 	$('#tree_exclude_sg').on("changed.jstree",function(e,data){
-  	selectOntree(data, '#tree_exclude_sg', '#tree_include_sg', selectedTaxonSG2, ["excludeIdList", "disabledInc", "includeIdList", "excludeNameList"], 'j4', 'j3')
+  	selectOntree(data, '#tree_exclude_sg', '#tree_include_sg', selectedTaxonSG, ["excludeIdList", "disabledInc", "includeIdList", "excludeNameList"], 'j4', 'j3')
 
 	})
 
@@ -578,9 +553,8 @@ $(document).ready(function(){
 	})
 
 	$('#submit_trees').click(function(){
-		submitTree(selectedTaxonAG)
+		submitTree(selectedTaxonAG, false)
 	})
-
 
 	$('#confirm_y').click(function(){
 		confirmSelection('')
@@ -619,7 +593,7 @@ $(document).ready(function(){
 		resetTree('_sg')
 	})
 
-	$('#submit_trees_sg').click(() => submitTreeSG(selectedTaxonSG))
+	$('#submit_trees_sg').click(() => submitTree(selectedTaxonSG, true))
 
 	$('#confirm_y_sg').click(function(){
 		confirmSelection('_sg')
@@ -640,10 +614,6 @@ $(document).ready(function(){
 		}
 
 	})
-
-
-
-
 })
 
 function reloadpage() {
