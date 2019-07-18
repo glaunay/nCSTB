@@ -130,7 +130,6 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
                         logger.info(`JOB completed-- Found stuff`);
                         logger.info(`${utils.inspect(buffer, false, null)}`);
                         let res = buffer.out;
-                        logger.info(res.gene);
                         ans.data = [res.data, res.not_in, res.tag, res.number_hits, res.data_card, res.gi, res.gene];
                     }
                     socket.emit('resultsSpecific', ans);
@@ -139,19 +138,15 @@ jobManager.start({ 'port': JM_PORT, 'TCPip': JM_ADRESS })
         });
         socket.on('submitAllGenomes', (data) => {
             logger.info(`socket:submitAllGenomes\n${utils.format(data)}`);
-            let buf = JSON.parse('{"x" : ' + data.gi + '}');
-            let gi = buf.x;
-            buf = JSON.parse('{"x" : ' + data.gni + '}');
-            let gni = buf.x;
-            logger.info(`included genomes:\n${utils.format(gi)}`);
-            logger.info(`excluded genomes:\n${utils.format(gni)}`);
+            logger.info(`included genomes:\n${utils.format(data.gi)}`);
+            logger.info(`excluded genomes:\n${utils.format(data.gni)}`);
             logger.info(`${utils.format(data.pam)}`);
             logger.info(`Length of motif: ${utils.format(data.sgrna_length)}`);
             let jobOpt = {
                 "exportVar": {
                     "rfg": param.dataFolder,
-                    "gi": gi.join('&'),
-                    "gni": gni.join('&'),
+                    "gi": data.gi.join('&'),
+                    "gni": data.gni.join('&'),
                     "pam": data.pam,
                     "sl": data.sgrna_length,
                     "URL_CRISPR": param.url_vService,

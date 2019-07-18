@@ -385,8 +385,8 @@ function submitSetupAllGenome(){
 	$('#Waiting').show()
 
   socket.emit('submitAllGenomes', {
-      "gi":JSON.stringify($("#tree_include").jstree('get_bottom_selected', true).map(node => node.text)),
-      "gni":JSON.stringify($("#tree_exclude").jstree('get_bottom_selected', true).map(node => node.text)),
+      "gi":$("#tree_include").jstree('get_bottom_selected', true).map(node => node.text),
+      "gni":$("#tree_exclude").jstree('get_bottom_selected', true).map(node => node.text),
       "pam":$("select[name='pam_AllG'] > option:selected").val(),
       "sgrna_length":$("select[name='sgrna-length_AllG'] > option:selected").val()
     });
@@ -404,8 +404,8 @@ function submitSpecificGene(n_gene, percent_id, pam, sgrna_length){
 	$('#Waiting').show();
 
 	socket.emit("submitSpecific", { "seq"   : final_sequence,
-									"gi"   : JSON.stringify($("#tree_include_sg").jstree('get_bottom_selected', true).map(node => node.text)),
-									"gni": JSON.stringify($("#tree_exclude_sg").jstree('get_bottom_selected', true).map(node => node.text)),
+									"gi"   : $("#tree_include_sg").jstree('get_bottom_selected', true).map(node => node.text),
+									"gni"  : $("#tree_exclude_sg").jstree('get_bottom_selected', true).map(node => node.text),
 									"n"     : n_gene,
 									"pid"   : percent_id,
 									"pam"   : pam,
@@ -492,7 +492,7 @@ function setupSpecificGene(){
   $('#AG_click').hide()
   $('#AG_click2').show()
 	$('#tree').hide()
-  $('#SG_click').hide()
+  $('#SG_click').show()
 	$('#SG_click2').hide()
   $('#spec_tips').show()
 	$('#other_parameters').hide()
