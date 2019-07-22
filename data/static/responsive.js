@@ -159,6 +159,7 @@ function treatResults(results, isSg){
     let node = document.createElement("result-page");
     let resDiv = document.querySelector("#ResGraph");
     resDiv.appendChild(node);
+    node.style.display = "inline-block"
 
     if(isSg){
       let gene = data[6];
@@ -210,7 +211,7 @@ function clickNav(d){
     d.className="nav-link active";
     // show/hide results
     if (d.id == "graphicResult"){
-      document.querySelector("result-page").style.display="block";
+      document.querySelector("result-page").style.display="inline-block";
       document.querySelector("#ResTable").style.display="none";
     } else if (d.id == "tableResult"){
       document.querySelector("result-page").style.display="none";
