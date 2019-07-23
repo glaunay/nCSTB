@@ -24,6 +24,7 @@
     "express": "^4.16.3",
     "jsonfile": "^5.0.0",
     "ms-jobmanager": "^2.1.0",
+    "nano": "^8.1.0",
     "socket-io": "^1.0.0",
     "socket.io": "^2.1.1",
     "winston": "^3.0.0"
