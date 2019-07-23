@@ -34,7 +34,7 @@ function displayTree(suffix, searchType, treeType){
 
 	$(treeType+suffix).jstree({
 		"core" : {
-			'data' : { "url" : "./jsontree.json", "dataType" : "json"},
+			'data' : { "url" : "http://127.0.0.1:3002/tree", "dataType" : "json"},
 			'themes' : [
 				{"dots" : true}
 			],
@@ -147,7 +147,7 @@ function treatResults(results, isSg){
 	$("#Waiting").hide();
     var data = results.data;
 
-	if (results.data.length >= 6){
+	if (results.data.length >= 7){
 
 		$('#Result').show()
 		let res=data[0];
@@ -156,19 +156,21 @@ function treatResults(results, isSg){
 		let number_hits=data[3];
 		let data_card =data[4];
 		let gi=data[5];
+    let size=data[6];
     let node = document.createElement("result-page");
     let resDiv = document.querySelector("#ResGraph");
     resDiv.appendChild(node);
     node.style.display = "inline-block"
 
     if(isSg){
-      let gene = data[6];
+      let gene = data[7];
       node.setAttribute("gene", JSON.stringify(gene));
     }
 
 		node.setAttribute( "complete_data", JSON.stringify(res) );
 		node.setAttribute( "all_data", JSON.stringify(data_card) );
 		node.setAttribute("org_names", gi);
+    node.setAttribute("size", SON.stringify(size));
 
 
 		console.log("bip");
