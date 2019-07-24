@@ -170,7 +170,7 @@ function treatResults(results, isSg){
 		node.setAttribute( "complete_data", JSON.stringify(res) );
 		node.setAttribute( "all_data", JSON.stringify(data_card) );
 		node.setAttribute("org_names", gi);
-    node.setAttribute("size", SON.stringify(size));
+    node.setAttribute("size", JSON.stringify(size));
 
 
 		console.log("bip");
