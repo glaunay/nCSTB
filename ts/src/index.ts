@@ -140,7 +140,7 @@ _io.on('connection', (socket)=>{
                 "URL_CRISPR" : param.url_vService,
                 "NAME_TAXON" : param.name_taxondb,
                 "NAME_TREE" : param.name_treedb,
-                "URL_TREE_TAXON" : param.url_tree_taxonDB
+                "URL_TREE_TAXON" : param.url_tree_taxonDB,
                 "seq" : data.seq,
                 "n"   : data.n,
                 "pid" : data.pid
