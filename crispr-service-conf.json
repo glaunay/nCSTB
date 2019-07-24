@@ -8,5 +8,6 @@
 "name_taxondb" : "taxon_db",
 "name_treedb" : "taxon_tree",
 "url_tree_taxonDB" : "http://192.168.117.151:2346/",
+"url_treeDB" : "http://arwen-cdb.ibcp.fr:5984/",
 "coreScriptsFolder" : "/data/software/mobi/crispr-tools/1.0.0/scripts"
 }
