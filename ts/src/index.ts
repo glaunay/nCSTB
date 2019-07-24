@@ -138,8 +138,9 @@ _io.on('connection', (socket)=>{
                 "pam" : data.pam,
                 "sl" : data.sgrna_length,
                 "URL_CRISPR" : param.url_vService,
-                "URL_TAXON" : param.url_taxonDB,
-                "URL_TREE" : param.url_treeDB,
+                "NAME_TAXON" : param.name_taxondb,
+                "NAME_TREE" : param.name_treedb,
+                "URL_TREE_TAXON" : param.url_tree_taxonDB
                 "seq" : data.seq,
                 "n"   : data.n,
                 "pid" : data.pid
@@ -191,8 +192,9 @@ _io.on('connection', (socket)=>{
                 "pam" : data.pam,
                 "sl" : data.sgrna_length,
                 "URL_CRISPR" : param.url_vService,
-                "URL_TAXON" : param.url_taxonDB,
-                "URL_TREE" : param.url_treeDB
+                "NAME_TAXON" : param.name_taxondb,
+                "NAME_TREE" : param.name_treedb,
+                "URL_TREE_TAXON" : param.url_tree_taxonDB
             },
             "modules" : ["crispr-tools"],
             "jobProfile" : "crispr-dev",

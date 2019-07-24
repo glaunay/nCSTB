@@ -4,10 +4,9 @@
 "comments" : "These are variables required by the webservice, which cant be included in modules",
 "blastdb" : "/data/databases/mobi/crispr_clean/big.fasta",
 "dataFolder" : "/data/databases/mobi/crispr_clean/genome_index",
-"url_vService" : "http://192.168.117.151:2345",
-"url_taxonDB" : "http://arwen-cdb.ibcp.fr:5984/taxon_db",
-"endPoint_treedb" : "http://arwen-cdb.ibcp.fr:5984/",
+"url_vService" : "http://192.168.117.151:2346",
+"name_taxondb" : "taxon_db",
 "name_treedb" : "taxon_tree",
-"url_treeDB" : "http://arwen-cdb.ibcp.fr:5984/taxon_tree",
+"url_tree_taxonDB" : "http://192.168.117.151:2346/",
 "coreScriptsFolder" : "/data/software/mobi/crispr-tools/1.0.0/scripts"
 }
