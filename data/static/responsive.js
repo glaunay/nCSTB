@@ -34,7 +34,7 @@ function displayTree(suffix, searchType, treeType){
 
 	$(treeType+suffix).jstree({
 		"core" : {
-			'data' : { "url" : "http://127.0.0.1:3002/tree", "dataType" : "json"},
+			'data' : { "url" : "http://crispr-dev.ibcp.fr:80/tree", "dataType" : "json"},
 			'themes' : [
 				{"dots" : true}
 			],
