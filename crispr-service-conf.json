@@ -7,7 +7,7 @@
 "url_vService" : "http://192.168.117.151:2345",
 "url_taxonDB" : "http://arwen-cdb.ibcp.fr:5984/taxon_db",
 "endPoint_treedb" : "http://arwen-cdb.ibcp.fr:5984/",
-"name_treedb" : "taxon_db",
-"url_treeDB" : "http://arwen-cdb.ibcp.fr:5984/taxon_tree/db",
+"name_treedb" : "taxon_tree",
+"url_treeDB" : "http://arwen-cdb.ibcp.fr:5984/taxon_tree",
 "coreScriptsFolder" : "/data/software/mobi/crispr-tools/1.0.0/scripts",
 }
