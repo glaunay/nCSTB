@@ -62,7 +62,7 @@ app.get('/kill/:jobid',  (req, res) => {
 });
 
 app.get('/tree', (req, res) => {
-  var nano= require('nano')(param.endPoint_treedb);
+  var nano= require('nano')(param.url_tree_taxonDB);
   nano.request({db:param.name_treedb, doc:"maxi_tree"}, (err, data) => {
     let tree_json = data["tree"].replace(/"/g, "'");
     tree_json = tree_json.replace(/ : [^']*/g, "");
