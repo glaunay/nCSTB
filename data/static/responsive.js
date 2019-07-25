@@ -182,9 +182,9 @@ function treatResults(results, isSg){
 		if (parseInt(number_hits)>10000){
 			infos+=' (only the best 10 000 are written to this file).</p>'
 		}
-    infos +='</br><i class="material-icons" id="drop_not_in off" onclick="clickDrop(this)">arrow_drop_down</i>'
+    infos +='</br><i class="material-icons" id="drop_not_in off" class="drop" onclick="clickDrop(this)">arrow_drop_down</i>'
 		if (not_in!=''){
-			infos+='<p> All hits are absent (based on Bowtie2 alignment) from excluded genome(s) : '+not_in;
+			infos+='<p> All hits are absent from excluded genome(s) : '+not_in;
 		}
 		else{
 			infos+='<p> No excluded genomes selected.</p>'
